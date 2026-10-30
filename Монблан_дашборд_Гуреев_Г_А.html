@@ -1,0 +1,906 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Монблан — продажи квартир</title>
+  <style>
+:root{--bg:#f3f1ed;--paper:#fffefa;--ink:#263132;--muted:#76817d;--line:#dce1da;--sold:#405e61;--open:#b27b5c;--gold:#d7b38b}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.38 -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+button{font:inherit}
+.page{max-width:1760px;margin:auto;padding:20px 24px 25px}
+.mast{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:11px;gap:16px}
+.brand{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.12em}
+.brand b{color:var(--open);font-size:14px}
+.brand-mark{width:20px;height:20px;display:inline-block;background:linear-gradient(135deg,#9aadaa,#334d50);clip-path:polygon(50% 0,100% 43%,81% 100%,19% 100%,0 43%)}
+.period{font-size:11px;color:var(--muted)}
+.intro{padding:18px 0 12px}
+.eyebrow,.section-index{display:block;color:#916f59;text-transform:uppercase;font-size:9px;font-weight:800;letter-spacing:.15em}
+h1{font-size:clamp(27px,2.8vw,42px);line-height:1.08;letter-spacing:-.045em;margin:6px 0 6px;font-weight:760}
+.intro p{margin:0;color:var(--muted);font-size:12px}
+.top-filters{display:flex;flex-wrap:wrap;align-items:flex-start;gap:7px;margin:0 0 12px}
+.top-filter{min-width:0;min-height:45px;display:flex;flex-direction:column;gap:2px;padding:5px 9px;background:var(--paper);border:1px solid var(--line);border-radius:7px}
+.time-filter{position:relative;width:218px}
+.top-filter:nth-child(2){width:143px}.top-filter:nth-child(3){width:155px}.top-filter:nth-child(4){width:175px}.top-filter:nth-child(5){width:175px}
+.top-filter>label,.filter-label{color:#8c6d58;font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.top-filter select{width:100%;min-width:0;border:0;background:transparent;color:#415d5c;font-family:inherit;font-size:11px;font-weight:700;line-height:1.35;cursor:pointer;outline:none;padding:0 1px}
+.top-filter select:focus-visible,.period-trigger:focus-visible{outline:2px solid #8ea99c;outline-offset:2px;border-radius:3px}
+.period-trigger{display:flex;align-items:center;gap:5px;width:100%;min-width:0;border:0;background:transparent;color:#415d5c;text-align:left;font-size:11px;font-weight:700;cursor:pointer;padding:0}
+.period-trigger svg{width:15px;height:15px;flex:none;color:#78928b}
+.period-trigger #period-trigger-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.period-chevron{font-size:16px;font-weight:400;color:#69827d;line-height:12px}
+.period-popover{position:absolute;z-index:80;top:calc(100% + 6px);left:0;width:338px;max-width:calc(100vw - 32px);padding:12px;background:var(--paper);border:1px solid #cdd8cf;border-radius:9px;box-shadow:0 16px 35px rgba(28,46,42,.17)}
+.period-popover[hidden]{display:none}
+.period-popover-title,.period-range-title{color:#495e59;font-size:11px;font-weight:760;margin:0 0 8px}
+.period-presets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;padding-bottom:11px;border-bottom:1px solid var(--line)}
+.period-presets button{min-width:0;padding:6px 8px;border:1px solid transparent;border-radius:5px;background:#f5f7f3;color:#4b625c;text-align:left;font-size:10px;cursor:pointer}
+.period-presets button:hover,.period-presets button:focus-visible{background:#e7eee8;outline:none}
+.period-presets button.active{background:#e0ece4;border-color:#9cb6a8;color:#365e59;font-weight:750}
+.period-range-title{margin:11px 0 5px}
+.calendar-head{display:flex;align-items:center;justify-content:space-between;gap:6px;margin:2px 0 6px;color:#405a56;font-size:11px}
+.calendar-head strong{font-weight:760;text-transform:capitalize}
+.calendar-nav{width:25px;height:25px;border:1px solid #d7e0d8;border-radius:5px;background:#fff;color:#4d6a63;font-size:18px;line-height:1;cursor:pointer}
+.calendar-nav:hover:not(:disabled),.calendar-nav:focus-visible{background:#e8f0ea;outline:none}
+.calendar-nav:disabled{opacity:.28;cursor:default}
+.calendar-weekdays,.calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;text-align:center}
+.calendar-weekdays{margin-bottom:4px;color:#8b9990;font-size:9px;font-weight:730}
+.calendar-grid .calendar-blank{height:31px}
+.calendar-day{height:31px;border:0;border-radius:5px;background:transparent;color:#415a55;font-size:11px;font-variant-numeric:tabular-nums;cursor:pointer}
+.calendar-day:hover:not(:disabled),.calendar-day:focus-visible{background:#e5eee7;outline:none}
+.calendar-day.in-range{border-radius:2px;background:#e2ebe5}
+.calendar-day.range-start,.calendar-day.range-end,.calendar-day.range-start:hover,.calendar-day.range-end:hover{background:#426468;color:#fff;border-radius:5px;font-weight:800}
+.calendar-day:disabled{opacity:.24;cursor:default}
+.calendar-selection{min-height:19px;margin-top:8px;color:#5a7069;font-size:10px;font-weight:650;text-align:center}
+.period-actions{display:flex;justify-content:flex-end;margin-top:11px}
+.period-actions button{border:0;border-radius:5px;background:#426468;color:#fff;padding:6px 11px;font-size:10px;font-weight:740;cursor:pointer}
+.period-actions button:hover,.period-actions button:focus-visible{background:#315458;outline:none}
+.period-actions button:disabled{opacity:.42;cursor:default}
+.period-anchor{margin-top:8px;color:#9aa69f;font-size:9px;text-align:right}
+.top-reset{align-self:center;margin-left:5px;padding:4px 5px;font-size:10px}
+.overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin:3px 0 12px;background:var(--paper);border:1px solid var(--line);border-radius:10px;box-shadow:0 5px 16px rgba(35,49,45,.035);overflow:hidden}
+.factoid-card{min-width:0;min-height:167px;display:flex;flex-direction:column;padding:12px 18px 9px;border-left:1px solid var(--line)}
+.factoid-card:first-child{border-left:0}
+.factoid-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:4px}
+.factoid-label{color:#8c6d58;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+.factoid-period{color:#95a099;font-size:9px;text-align:right;white-space:nowrap}
+.factoid-value{color:var(--ink);font-size:clamp(20px,1.7vw,28px);line-height:1.13;font-weight:750;letter-spacing:-.04em;white-space:nowrap;font-variant-numeric:tabular-nums}
+.factoid-spark{display:block;width:100%;height:75px;margin-top:auto;overflow:visible}
+.spark-date{fill:#8b9891;font-size:9px;font-weight:650;pointer-events:none}
+.spark-hit{cursor:pointer}.spark-hit:hover,.spark-hit:focus{fill:rgba(102,136,119,.11);outline:none}
+.factoid-foot{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-top:1px;color:#819087;font-size:9px;white-space:nowrap}
+.factoid-wow{margin-left:auto;font-weight:760;color:#496663;text-align:right}
+.factoid-sales-summary{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.factoid-rate{color:#637f78;font-size:10px;font-weight:750;white-space:nowrap}
+.factoid-stock .stock-track{height:5px;margin:5px 0 3px;background:#e8e9e1;border-radius:10px;overflow:hidden}
+.stock-track span{display:block;height:100%;background:linear-gradient(90deg,#6b8782,#3e5e61);border-radius:10px;transition:width .11s linear}
+.filter-bar{min-height:34px;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}
+.filter-chips{display:flex;align-items:center;flex-wrap:wrap;gap:5px}
+.empty-filter{font-size:10px;color:#8b9690}
+.chip,.reset-button,.floor-bands button,.text-toggle{border:1px solid #c9d3cb;background:#f9fbf8;color:#415d5c;border-radius:30px;padding:3px 8px;cursor:pointer;font-size:10px;font-weight:700;transition:background .15s,border-color .15s}
+.chip:hover,.chip:focus-visible,.reset-button:hover,.reset-button:focus-visible,.floor-bands button:hover,.floor-bands button:focus-visible,.text-toggle:hover,.text-toggle:focus-visible{background:#e4ece6;border-color:#7e9d91;outline:none}
+.chip::after{content:"×";margin-left:6px;font-size:13px;vertical-align:-1px}
+.reset-button{border:0;background:none;color:#90684f;white-space:nowrap}
+.reset-button[hidden],.text-toggle[hidden]{display:none}
+.top-reset[hidden]{display:block;visibility:hidden;pointer-events:none}
+.dashboard-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(370px,410px);gap:12px;align-items:stretch}
+.panel{min-width:0;background:var(--paper);border:1px solid var(--line);border-radius:10px;box-shadow:0 5px 16px rgba(35,49,45,.035)}
+.map-panel{overflow:hidden;display:flex;flex-direction:column}
+.map-head{display:flex;justify-content:space-between;align-items:start;gap:14px;padding:15px 16px 10px}
+.map-head h2{font-size:20px;letter-spacing:-.035em;margin:4px 0 4px;line-height:1.12}
+.map-head p{font-size:11px;color:var(--muted);margin:0}
+.map-head p.is-animating{color:#496e68;font-weight:720}
+.map-head p.is-animating::before{content:'';display:inline-block;width:6px;height:6px;margin-right:7px;border-radius:50%;background:#6b9587;vertical-align:1px;animation:week-pulse .55s ease-in-out infinite alternate}
+@keyframes week-pulse{from{opacity:.45}to{opacity:1}}
+.legend{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:5px 10px;min-width:182px;padding-top:7px;font-size:9px;color:#697671}
+.legend span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.legend span[hidden]{display:none}
+.key{width:9px;height:9px;border-radius:2px;display:inline-block}
+.key.sold{background:var(--sold)}.key.unsold{background:var(--open)}.key.focus{background:var(--sold);border:2px solid var(--gold)}
+.map-toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:5px 12px;padding:0 16px 8px}
+.floor-toolbar{display:flex;align-items:center;gap:10px;font-size:10px;color:var(--muted)}
+.floor-bands{display:flex;flex-wrap:wrap;gap:4px}
+.floor-bands button{padding:2px 7px;background:transparent;border-color:transparent;font-size:9px;color:#60736b}
+.floor-bands button.active{background:#dce8df;border-color:#b6c9bb;color:#2f5354}
+.chart-scroll{flex:1;display:flex;align-items:center;overflow-x:auto;overflow-y:hidden;scrollbar-color:#bcc8c1 transparent}
+.chart-stage{width:100%;min-width:760px;margin:auto}
+#section-chart{display:block;width:100%;height:auto}
+.chart-axis{fill:#788781;font-size:10px;font-weight:650}
+.chart-building{fill:var(--ink);font-size:22px;font-weight:770;letter-spacing:-.03em;cursor:pointer;transition:fill .18s}
+.chart-building:hover,.chart-building:focus{fill:var(--open);outline:none}
+.chart-building-sub{fill:#64746e;font-size:12px;pointer-events:none}
+.chart-group{fill:#e5eae4;stroke:#cbd5cb;stroke-width:1;cursor:pointer;transition:fill .18s,stroke .18s,filter .18s,opacity .18s}
+.chart-group:hover,.chart-group:focus{fill:#d6e2da;stroke:var(--sold);filter:drop-shadow(0 3px 5px rgba(39,62,62,.15));outline:none}
+.chart-room{fill:#3e5758;font-size:10px;font-weight:750;pointer-events:none}
+.chart-home{cursor:pointer;stroke:#fff;stroke-width:1.6;vector-effect:non-scaling-stroke;transform-box:fill-box;transform-origin:center;transition:fill .11s linear,transform .18s,stroke .11s linear,filter .11s linear,opacity .11s linear}
+.chart-home:hover,.chart-home:focus{transform:scale(1.045);stroke:#fbfaf6;stroke-width:2.5;filter:drop-shadow(0 3px 5px rgba(25,42,42,.38));outline:none}
+.chart-home.out-of-scope{opacity:.13}.chart-home.deal-context-dim{opacity:.23}.chart-home.unsold-context-dim{opacity:.43}
+.chart-home.focus-deal{stroke:var(--gold);stroke-width:2.7;filter:drop-shadow(0 2px 4px rgba(25,42,42,.28))}
+.map-panel.is-animating .chart-home.focus-deal{filter:drop-shadow(0 1px 3px rgba(25,42,42,.23))}
+.chart-group.out-of-scope{opacity:.32}
+.sidebar{display:flex;flex-direction:column;gap:12px;height:100%}
+.segment-panel{flex:1}
+.side-panel{padding:14px 14px 12px;overflow:hidden}
+.side-head{display:block}
+.side-head h2{font-size:17px;line-height:1.15;letter-spacing:-.03em;margin:4px 0 0;font-weight:760}
+#manager-table{width:100%;table-layout:fixed;border-collapse:collapse;margin-top:11px;font-variant-numeric:tabular-nums}
+#manager-table col.manager-col{width:76px}
+#manager-table th{height:38px;padding:0 4px 5px;text-align:left;vertical-align:bottom;border-bottom:1px solid #dce4dc;color:#7c8b83;font-size:9px;font-weight:700}
+#manager-table th:first-child{padding-left:2px}
+.manager-sort{position:relative;display:block;width:100%;padding:0;border:0;background:none;color:inherit;text-align:left;cursor:pointer;font-size:9px;font-weight:700;line-height:1.2}
+.manager-sort span{display:block;font-size:8px;font-weight:600;color:#9aa69e}
+.manager-sort.active{color:#405e61}
+.manager-sort.active::after{content:'↓';position:absolute;right:0;top:0;color:#8b9e95;font-size:9px}
+.manager-sort.active.asc::after{content:'↑'}
+.manager-sort:hover,.manager-sort:focus-visible{color:#a36c4d;outline:none}
+#manager-table td{height:35px;padding:3px 4px;border-bottom:1px solid #edf0e9}
+#manager-table tbody tr:last-child td{border-bottom:0}
+#manager-table tbody tr{cursor:pointer}
+#manager-table tbody tr:hover,#manager-table tbody tr:focus-visible{background:#f2f6f2;outline:none}
+#manager-table tbody tr.selected{background:#f5ece5}
+.manager-row-name{padding-left:2px!important;color:#405350;font-size:10.5px;font-weight:720;white-space:nowrap}
+.manager-cell{position:relative;height:27px;min-width:0;overflow:hidden;border-radius:3px;background:#f5f7f3}
+.manager-cell-bar{position:absolute;inset:2px auto 2px 2px;min-width:0;border-radius:2px;transition:width .11s linear}
+.spark-new-bar{transform-box:fill-box;transform-origin:center bottom;transition:transform .11s linear}
+.manager-cell.revenue .manager-cell-bar{background:#bfd2cd}
+.manager-cell.count .manager-cell-bar{background:#d2ddd7}
+.manager-cell.discount .manager-cell-bar{background:#e7d0bf}
+.manager-cell-number{position:relative;z-index:1;display:block;padding:6px 5px 0 2px;text-align:right;color:#304745;font-size:10px;font-weight:760;white-space:nowrap}
+.manager-table-empty{padding:16px 2px!important;color:#839087;font-size:11px}
+#segment-chart{display:block;width:100%;max-width:430px;height:auto;margin-inline:auto}
+.segment-cell{transition:fill .11s linear,stroke .11s linear}
+.segment-axis{fill:#84918a;font-size:9px;font-weight:760;letter-spacing:.03em}
+.segment-building{fill:#405350;font-size:12px;font-weight:760}
+.segment-rate{fill:#324744;font-size:11px;font-weight:800;font-variant-numeric:tabular-nums}
+.segment-count{fill:#70827a;font-size:8px;font-weight:650;font-variant-numeric:tabular-nums}
+.segment-empty{fill:#87958d;font-size:9px}
+.segment-hit{cursor:pointer}.segment-hit:hover,.segment-hit:focus{fill:rgba(102,136,119,.15);outline:none}
+.tooltip{position:fixed;z-index:100;width:310px;max-width:calc(100vw - 24px);padding:15px 17px;background:#263638;color:#fff;border:1px solid #607572;border-top:2px solid #a9bdb6;border-radius:14px;box-shadow:0 22px 48px rgba(29,42,42,.29);pointer-events:none;font-size:12px;line-height:1.4;opacity:0;visibility:hidden;transform:translateY(7px) scale(.985);transition:opacity .18s,transform .18s,visibility 0s linear .18s}
+.tooltip[hidden]{display:none}.tooltip.is-visible{opacity:1;visibility:visible;transform:translateY(0) scale(1);transition:opacity .18s,transform .18s,visibility 0s}
+.tip-kicker{color:#b7cbc6;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.11em}
+.tip-title{font-size:18px;font-weight:740;line-height:1.12;letter-spacing:-.025em;margin:6px 0 9px}
+.tip-status{color:#c7e0d8;font-weight:750;border-bottom:1px solid #526764;padding-bottom:9px;margin-bottom:9px}
+.tip-status::before{content:"";display:inline-block;width:7px;height:7px;margin-right:7px;border-radius:50%;background:#9fc5b9;vertical-align:1px}
+.tip-status.unsold{color:#e4b18d}.tip-status.unsold::before{background:#dca47c}
+.tip-grid{display:grid;grid-template-columns:90px 1fr;gap:5px 10px}.tip-grid span:nth-child(odd){color:#b6c7c1}.tip-grid span:nth-child(even){text-align:right;font-weight:620}
+.tip-hint{margin-top:11px;padding-top:8px;border-top:1px solid #526764;color:#abbab3;font-size:10px}
+@media(max-width:1100px){.dashboard-layout{grid-template-columns:1fr}.sidebar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;height:auto}.factoid-foot{white-space:normal}.chart-stage{min-width:900px}}
+@media(max-width:800px){.sidebar{grid-template-columns:1fr}.overview{grid-template-columns:repeat(2,minmax(0,1fr))}.factoid-stock{grid-column:span 2}.factoid-card:nth-child(2),.factoid-card:nth-child(3){border-top:1px solid var(--line)}.factoid-card:nth-child(2){border-left:0}}
+@media(max-width:650px){.page{padding:13px 11px 22px}.intro{padding:14px 0 10px}.intro p{font-size:11px}.top-filters{gap:6px}.time-filter{width:100%}.top-filter:nth-child(2),.top-filter:nth-child(3),.top-filter:nth-child(4),.top-filter:nth-child(5){width:calc(50% - 3px)}.top-reset{margin-left:0}.overview{grid-template-columns:1fr}.factoid-stock{grid-column:auto}.factoid-card{min-height:157px;padding:10px 12px;border-left:0}.factoid-card:not(:first-child){border-top:1px solid var(--line)}.factoid-head{display:flex}.factoid-period{font-size:8px}.factoid-label{font-size:8px}.factoid-value{font-size:clamp(19px,5vw,26px)}.factoid-foot{font-size:8px;white-space:normal}.map-head{display:block}.legend{justify-content:flex-start;padding-top:9px}.chart-stage{min-width:850px}.filter-bar{align-items:flex-start}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important;animation:none!important}}
+
+  </style>
+</head>
+<body>
+<main class="page">
+  <header class="mast">
+    <div class="brand"><i class="brand-mark" aria-hidden="true"></i><span>Монблан <b>·</b> продажи квартир</span></div>
+    <span class="period">Март — сентябрь 2026</span>
+  </header>
+
+  <section class="intro" aria-labelledby="page-title">
+    <div>
+      <div class="eyebrow">Аналитический дашборд</div>
+      <h1 id="page-title">Продажи квартир в ЖК «Монблан»</h1>
+    </div>
+  </section>
+
+  <section class="top-filters" aria-label="Фильтры дашборда">
+    <div class="top-filter time-filter">
+      <span class="filter-label">Период</span>
+      <button id="period-trigger" class="period-trigger" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="period-popover"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="4" width="15" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M2.5 8h15M6 2.5v3M14 2.5v3" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg><span id="period-trigger-text">Весь период</span><span class="period-chevron" aria-hidden="true">⌄</span></button>
+      <div id="period-popover" class="period-popover" role="dialog" aria-label="Выбор периода" hidden>
+        <div class="period-popover-title">Выберите период</div>
+        <div class="period-presets"><button type="button" data-period="all">Весь период</button><button type="button" data-period="last7">Последние 7 дней</button><button type="button" data-period="last30">Последние 30 дней</button><button type="button" data-period="last90">Последние 90 дней</button></div>
+        <div class="period-range-title">Свой диапазон</div>
+        <div class="calendar-head"><button id="calendar-prev" class="calendar-nav" type="button" aria-label="Предыдущий месяц">‹</button><strong id="calendar-month"></strong><button id="calendar-next" class="calendar-nav" type="button" aria-label="Следующий месяц">›</button></div>
+        <div class="calendar-weekdays" aria-hidden="true"><span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span></div>
+        <div id="calendar-grid" class="calendar-grid" role="group" aria-label="Выберите начало и конец периода"></div>
+        <div id="calendar-selection" class="calendar-selection" aria-live="polite">Выберите начало и конец</div>
+        <div class="period-actions"><button id="period-apply" type="button" disabled>Применить</button></div>
+        <div id="period-anchor" class="period-anchor"></div>
+      </div>
+    </div>
+    <div class="top-filter"><label for="building-select">Корпус</label><select id="building-select"><option value="">Все корпуса</option></select></div>
+    <div class="top-filter"><label for="rooms-select">Комнатность</label><select id="rooms-select"><option value="">Все варианты</option></select></div>
+    <div class="top-filter"><label for="manager-select">Менеджер</label><select id="manager-select"><option value="">Все менеджеры</option></select></div>
+    <div class="top-filter"><label for="view-select">Вид из окна</label><select id="view-select" aria-label="Фильтр по виду из окна"></select></div>
+    <button id="reset-filters" class="reset-button top-reset" type="button" hidden>Сбросить фильтры</button>
+  </section>
+  <div class="overview" id="metrics" aria-label="Ключевые показатели"></div>
+  <div class="filter-bar" aria-label="Выбранные фильтры">
+    <div id="filter-chips" class="filter-chips"></div>
+  </div>
+
+  <div class="dashboard-layout">
+    <section class="panel map-panel" aria-labelledby="map-title">
+      <div class="panel-head map-head">
+        <div><h2 id="map-title">Продажи квартир по корпусам и этажам</h2></div>
+        <div class="legend" aria-label="Легенда"><span><i class="key sold"></i>Продана</span><span><i class="key unsold"></i><span id="unsold-legend-label">В продаже</span></span><span id="focus-legend" hidden><i class="key focus"></i><span id="focus-legend-label">Выбранные сделки</span></span></div>
+      </div>
+      <div class="map-toolbar"><div class="floor-toolbar"><span>Этажи</span><div id="floor-bands" class="floor-bands"></div></div></div>
+      <div class="chart-scroll"><div class="chart-stage"><svg id="section-chart" role="group" aria-label="Квартиры по корпусам и этажам" viewBox="0 0 1400 667"></svg></div></div>
+    </section>
+
+    <aside class="sidebar" aria-label="Дополнительные графики">
+      <section class="panel side-panel manager-panel" aria-labelledby="manager-title">
+        <div class="side-head"><h2 id="manager-title">Продажи по менеджерам</h2></div>
+        <table id="manager-table" aria-label="Выручка, количество сделок и скидки по менеджерам; выберите строку для фильтрации">
+          <colgroup><col class="manager-col"><col><col><col></colgroup>
+          <thead><tr>
+            <th scope="col">Менеджер</th>
+            <th scope="col" aria-sort="descending"><button type="button" class="manager-sort active" data-manager-sort="revenue">Выручка <span>млрд ₽</span></button></th>
+            <th scope="col" aria-sort="none"><button type="button" class="manager-sort" data-manager-sort="count">Сделки <span>шт.</span></button></th>
+            <th scope="col" aria-sort="none"><button type="button" class="manager-sort" data-manager-sort="discount">Скидки <span>млн ₽</span></button></th>
+          </tr></thead>
+          <tbody id="manager-table-body"></tbody>
+        </table>
+      </section>
+
+      <section class="panel side-panel segment-panel" aria-labelledby="segment-title">
+        <div class="side-head"><h2 id="segment-title">Где продажи отстают</h2></div>
+        <svg id="segment-chart" role="group" aria-label="Доля проданных квартир по корпусам и комнатности"></svg>
+      </section>
+    </aside>
+  </div>
+
+</main>
+<div id="tooltip" class="tooltip" role="tooltip" hidden></div>
+<script>
+'use strict';
+
+const RAW = [["МБ-К6-011","К6",3,1,"1К571Б",57.1,877450,50102400,0,50102400,"Глеб Аркадьевич","2026-03-02",9,"в сад"],["МБ-К1-064","К1",13,2,"К2870",87,1537245,133740329,0,133740329,"Марина Павловна","2026-03-03",17,"на Садовое"],["МБ-К1-125","К1",25,3,"3К1121",112.1,1479600,165863108,6510000,159353108,"Виктор Андреевич","2026-03-03",6,"на Садовое"],["МБ-К6-039","К6",7,1,"1К571Б",57.1,1024273,58486000,0,58486000,"Марина Павловна","2026-03-03",10,"в сад"],["МБ-К1-118","К1",23,2,"2К869",86.9,1709667,148570095,0,148570095,"Денис Олегович","2026-03-04",9,"на Садовое"],["МБ-К1-131","К1",26,4,"4К1646",164.6,1605955,264340205,0,264340205,"Ольга Николаевна","2026-03-04",26,"на реку"],["МБ-К1-015","К1",4,4,"4К1646",164.6,1066038,175469900,2890000,172579900,"Ольга Николаевна","2026-03-05",24,"на реку"],["МБ-К1-083","К1",16,2,"2К832",83.2,1603773,133433886,0,133433886,"Ольга Николаевна","2026-03-05",7,"на Садовое"],["МБ-К1-097","К1",18,2,"2К929",92.9,1503996,139721275,0,139721275,"Денис Олегович","2026-03-05",6,"на реку"],["МБ-К4-010","К4",3,1,"1К658",65.8,977313,64307200,0,64307200,"Ольга Николаевна","2026-03-05",3,"во двор"],["МБ-К6-020","К6",4,1,"1К643",64.3,931806,59915100,850000,59065100,"Глеб Аркадьевич","2026-03-05",17,"во двор"],["МБ-К1-036","К1",8,2,"2К986",98.6,1361014,134196000,0,134196000,"Ольга Николаевна","2026-03-06",11,"на реку"],["МБ-К1-041","К1",9,2,"2К832",83.2,1369202,113917600,0,113917600,"Ольга Николаевна","2026-03-06",11,"на Садовое"],["МБ-К1-109","К1",21,3,"3К1121",112.1,1265002,141806700,2810000,138996700,"Кирилл Евгеньевич","2026-03-10",42,"на Садовое"],["МБ-К6-027","К6",5,1,"1К643",64.3,941123,60514200,0,60514200,"Глеб Аркадьевич","2026-03-10",10,"во двор"],["МБ-К2-016","К2",6,3,"3К1243",123.4,1344527,165914600,3020000,162894600,"Денис Олегович","2026-03-11",8,"на реку и во двор"],["МБ-К1-095","К1",18,2,"2К832",83.2,1668565,138824615,3040000,135784615,"Виктор Андреевич","2026-03-12",10,"на Садовое"],["МБ-К6-031","К6",6,1,"1К571А",57.1,929364,53066700,900000,52166700,"Глеб Аркадьевич","2026-03-12",10,"в сад"],["МБ-К1-058","К1",12,2,"К2870",87,1464043,127371742,2700000,124671742,"Виктор Андреевич","2026-03-17",4,"на Садовое"],["МБ-К1-065","К1",13,2,"2К832",83.2,1482068,123308074,3720000,119588074,"Виктор Андреевич","2026-03-19",17,"на Садовое"],["МБ-К3-015","К3",5,1,"1К502",50.2,1630992,81875800,0,81875800,"Ольга Николаевна","2026-03-23",8,"на реку"],["МБ-К6-046","К6",8,1,"1К571Б",57.1,1075487,61410300,0,61410300,"Денис Олегович","2026-03-23",16,"в сад"],["МБ-К1-084","К1",16,2,"2К986",98.6,1579011,155690512,4400000,151290512,"Марина Павловна","2026-03-24",15,"на реку"],["МБ-К1-127","К1",25,4,"4К1646",164.6,1559180,256640976,4200000,252440976,"Тимур Ринатович","2026-03-24",3,"на реку"],["МБ-К3-007","К3",3,1,"1К502",50.2,1567659,78696500,0,78696500,"Денис Олегович","2026-03-24",9,"на реку"],["МБ-К5-015","К5",4,1,"1К505",50.5,1091507,55121100,0,55121100,"Глеб Аркадьевич","2026-03-24",7,"во двор"],["МБ-К2-015","К2",6,2,"2К742",74.2,1863327,138258900,0,138258900,"Марина Павловна","2026-03-25",9,"на реку"],["МБ-К4-026","К4",7,3,"3К1046",104.6,1441351,150765300,5650000,145115300,"Виктор Андреевич","2026-03-25",8,"на реку"],["МБ-К6-005","К6",2,1,"1К658",65.8,919009,60470800,1050000,59420800,"Глеб Аркадьевич","2026-03-26",8,"в сад и во двор"],["МБ-К1-042","К1",9,2,"2К986",98.6,1374624,135537960,0,135537960,"Ольга Николаевна","2026-03-27",12,"на реку"],["МБ-К1-138","К1",28,2,"2К869",86.9,2059690,178987076,0,178987076,"Тимур Ринатович","2026-03-27",8,"на Садовое"],["МБ-К1-010","К1",3,4,"4К1646",164.6,1055483,173732574,0,173732574,"Ольга Николаевна","2026-03-28",20,"на реку"],["МБ-К1-076","К1",15,2,"К2870",87,1669684,145262500,5380000,139882500,"Виктор Андреевич","2026-03-30",9,"на Садовое"],["МБ-К6-019","К6",4,1,"1К658",65.8,937482,61686300,0,61686300,"Марина Павловна","2026-03-30",26,"в сад и во двор"],["МБ-К2-009","К2",4,2,"2К742",74.2,1739488,129070000,4960000,124110000,"Виктор Андреевич","2026-03-31",9,"на реку"],["МБ-К1-011","К1",4,1,"1К614",61.4,915629,56219600,750000,55469600,"Глеб Аркадьевич","2026-04-04",5,"во двор"],["МБ-К5-016","К5",4,1,"1К498",49.8,1095699,54565800,0,54565800,"Глеб Аркадьевич","2026-04-04",17,"во двор"],["МБ-К1-060","К1",12,2,"2К986",98.6,1458762,143833967,3760000,140073967,"Виктор Андреевич","2026-04-06",14,"на реку"],["МБ-К4-015","К4",4,1,"1К658",65.8,987087,64950300,0,64950300,"Денис Олегович","2026-04-06",9,"во двор"],["МБ-К5-047","К5",8,1,"1К489",48.9,1043569,51030500,0,51030500,"Глеб Аркадьевич","2026-04-08",7,"на улицу"],["МБ-К6-053","К6",9,1,"1К571Б",57.1,1107751,63252600,0,63252600,"Марина Павловна","2026-04-08",16,"в сад"],["МБ-К6-066","К6",11,1,"1К571А",57.1,1242501,70946800,0,70946800,"Марина Павловна","2026-04-08",21,"в сад"],["МБ-К6-012","К6",3,1,"1К658",65.8,928199,61075500,0,61075500,"Денис Олегович","2026-04-09",8,"в сад и во двор"],["МБ-К1-022","К1",6,1,"1К668",66.8,991386,66224567,0,66224567,"Денис Олегович","2026-04-12",7,"во двор"],["МБ-К1-070","К1",14,2,"К2870",87,1614107,140427346,4960000,135467346,"Виктор Андреевич","2026-04-14",5,"на Садовое"],["МБ-К1-031","К1",7,2,"2К929",92.9,1270688,118046914,3630000,114416914,"Виктор Андреевич","2026-04-15",10,"на реку"],["МБ-К1-046","К1",10,2,"К2870",87,1327930,115529925,0,115529925,"Марина Павловна","2026-04-16",7,"на Садовое"],["МБ-К2-002","К2",2,1,"1К4940",49.4,1358917,67130500,0,67130500,"Денис Олегович","2026-04-16",11,"на реку"],["МБ-К4-031","К4",8,3,"3К1046",104.6,1484592,155288300,0,155288300,"Кирилл Евгеньевич","2026-04-16",27,"на реку"],["МБ-К2-019","К2",7,3,"3К1243",123.4,1371417,169232900,0,169232900,"Виктор Андреевич","2026-04-17",11,"на реку и во двор"],["МБ-К1-123","К1",24,4,"4К1646",164.6,1528608,251608800,0,251608800,"Тимур Ринатович","2026-04-20",6,"на реку"],["МБ-К5-008","К5",3,1,"1К505",50.5,1080701,54575400,0,54575400,"Глеб Аркадьевич","2026-04-20",8,"во двор"],["МБ-К6-074","К6",12,1,"1К571Б",57.1,2047124,116890800,0,116890800,"Ольга Николаевна","2026-04-20",9,"в сад"],["МБ-К1-001","К1",2,1,"1К614",61.4,897587,55111852,0,55111852,"Глеб Аркадьевич","2026-04-23",7,"во двор"],["МБ-К1-101","К1",19,2,"2К832",83.2,1701936,141601108,0,141601108,"Денис Олегович","2026-04-23",10,"на Садовое"],["МБ-К3-019","К3",6,1,"1К502",50.2,1679920,84332000,0,84332000,"Ольга Николаевна","2026-04-24",20,"на реку"],["МБ-К4-046","К4",11,3,"3К1046",104.6,1622253,169687700,3790000,165897700,"Виктор Андреевич","2026-04-24",6,"на реку"],["МБ-К4-051","К4",12,3,"3К1046",104.6,1670921,174778300,0,174778300,"Тимур Ринатович","2026-04-24",4,"на реку"],["МБ-К1-071","К1",14,2,"2К832",83.2,1526530,127007316,0,127007316,"Марина Павловна","2026-04-25",16,"на Садовое"],["МБ-К1-005","К1",2,4,"4К1646",164.6,1045033,172012450,6020000,165992450,"Виктор Андреевич","2026-04-27",7,"на реку"],["МБ-К1-096","К1",18,2,"2К986",98.6,1642803,161980409,6520000,155460409,"Виктор Андреевич","2026-04-28",13,"на реку"],["МБ-К3-001","К3",2,1,"1К519",51.9,1235850,64140600,0,64140600,"Глеб Аркадьевич","2026-04-28",11,"во двор"],["МБ-К1-067","К1",13,2,"2К929",92.9,1389324,129068207,0,129068207,"Марина Павловна","2026-04-30",16,"на реку"],["МБ-К1-107","К1",20,4,"4К1646",164.6,1434322,236089458,0,236089458,"Тимур Ринатович","2026-05-04",4,"на реку"],["МБ-К1-090","К1",17,2,"2К986",98.6,1610592,158804322,0,158804322,"Виктор Андреевич","2026-05-06",11,"на реку"],["МБ-К4-011","К4",4,3,"3К1046",104.6,1398961,146331300,0,146331300,"Ольга Николаевна","2026-05-07",12,"на реку"],["МБ-К1-134","К1",27,2,"2К869",86.9,1999699,173773860,0,173773860,"Ольга Николаевна","2026-05-08",34,"на Садовое"],["МБ-К1-082","К1",16,2,"К2870",87,1703078,148167750,0,148167750,"Денис Олегович","2026-05-09",7,"на Садовое"],["МБ-К4-006","К4",3,3,"3К1046",104.6,1385110,144882500,3540000,141342500,"Виктор Андреевич","2026-05-12",9,"на реку"],["МБ-К2-003","К2",2,1,"1К4990",49.9,1362743,68000900,0,68000900,"Марина Павловна","2026-05-13",15,"на реку"],["МБ-К3-023","К3",7,1,"1К502",50.2,1747112,87705000,0,87705000,"Денис Олегович","2026-05-13",20,"на реку"],["МБ-К1-073","К1",14,2,"2К929",92.9,1403217,130358889,0,130358889,"Ольга Николаевна","2026-05-18",9,"на реку"],["МБ-К4-021","К4",6,3,"3К1046",104.6,1427079,149272500,0,149272500,"Ольга Николаевна","2026-05-18",24,"на реку"],["МБ-К6-033","К6",6,1,"1К658",65.8,956325,62926200,600000,62326200,"Глеб Аркадьевич","2026-05-18",6,"в сад и во двор"],["МБ-К1-055","К1",11,2,"2К929",92.9,1335375,124056331,0,124056331,"Ольга Николаевна","2026-05-19",18,"на реку"],["МБ-К1-133","К1",27,3,"3К1121",112.1,1569707,175964171,4250000,171714171,"Виктор Андреевич","2026-05-19",8,"на Садовое"],["МБ-К6-003","К6",2,1,"1К571А",57.1,858590,49025500,0,49025500,"Глеб Аркадьевич","2026-05-19",5,"в сад"],["МБ-К2-012","К2",5,2,"2К742",74.2,1791658,132941000,0,132941000,"Ольга Николаевна","2026-05-20",24,"на реку"],["МБ-К1-006","К1",3,1,"1К614",61.4,906563,55662970,0,55662970,"Глеб Аркадьевич","2026-05-21",7,"во двор"],["МБ-К1-126","К1",25,2,"2К869",86.9,1884908,163798530,0,163798530,"Тимур Ринатович","2026-05-21",6,"на Садовое"],["МБ-К2-007","К2",3,3,"3К1243",123.4,1266978,156345100,4590000,151755100,"Ольга Николаевна","2026-05-21",13,"на реку и во двор"],["МБ-К1-078","К1",15,2,"2К986",98.6,1548050,152637757,6090000,146547757,"Виктор Андреевич","2026-05-22",6,"на реку"],["МБ-К3-009","К3",4,1,"1К519",51.9,1298382,67386000,0,67386000,"Ольга Николаевна","2026-05-22",9,"во двор"],["МБ-К4-005","К4",2,1,"1К658",65.8,967637,63670500,0,63670500,"Марина Павловна","2026-05-22",17,"во двор"],["МБ-К6-004","К6",2,1,"1К571Б",57.1,860245,49120000,950000,48170000,"Глеб Аркадьевич","2026-05-22",12,"в сад"],["МБ-К4-028","К4",7,1,"1К526",52.6,1093635,57525200,0,57525200,"Ольга Николаевна","2026-05-23",14,"на улицу"],["МБ-К1-017","К1",5,1,"1К668",66.8,981570,65568879,1040000,64528879,"Ольга Николаевна","2026-05-25",19,"во двор"],["МБ-К6-013","К6",3,1,"1К643",64.3,922579,59321800,1020000,58301800,"Ольга Николаевна","2026-05-25",17,"во двор"],["МБ-К4-016","К4",5,3,"3К1046",104.6,1412950,147794600,0,147794600,"Денис Олегович","2026-05-26",10,"на реку"],["МБ-К4-042","К4",10,1,"1К508",50.8,1206309,61280500,0,61280500,"Денис Олегович","2026-05-26",10,"на улицу"],["МБ-К5-009","К5",3,1,"1К498",49.8,1084849,54025500,850000,53175500,"Глеб Аркадьевич","2026-05-26",4,"во двор"],["МБ-К6-024","К6",5,1,"1К571А",57.1,911142,52026200,0,52026200,"Глеб Аркадьевич","2026-05-26",12,"в сад"],["МБ-К6-075","К6",12,1,"1К658",65.8,1163635,76567200,0,76567200,"Марина Павловна","2026-05-26",17,"в сад и во двор"],["МБ-К1-110","К1",21,2,"2К869",86.9,1611525,140041564,0,140041564,"Денис Олегович","2026-05-28",12,"на Садовое"],["МБ-К4-036","К4",9,3,"3К1046",104.6,1529129,159946900,0,159946900,"Кирилл Евгеньевич","2026-05-28",28,"на реку"],["МБ-К4-041","К4",10,3,"3К1046",104.6,1575003,164745300,6340000,158405300,"Виктор Андреевич","2026-05-28",9,"на реку"],["МБ-К6-038","К6",7,1,"1К571А",57.1,1022301,58373400,500000,57873400,"Глеб Аркадьевич","2026-05-28",10,"в сад"],["МБ-К1-007","К1",3,1,"1К668",66.8,962229,64276913,0,64276913,"Кирилл Евгеньевич","2026-05-29",33,"во двор"],["МБ-К1-130","К1",26,2,"2К869",86.9,1941456,168712486,4480000,164232486,"Виктор Андреевич","2026-05-29",11,"на Садовое"],["МБ-К1-139","К1",28,4,"4К1646",164.6,1703758,280438524,7320000,273118524,"Виктор Андреевич","2026-05-29",11,"на реку"],["МБ-К1-103","К1",19,2,"2К929",92.9,1534076,142515700,0,142515700,"Марина Павловна","2026-05-30",18,"на реку"],["МБ-К1-121","К1",24,3,"3К1121",112.1,1409142,157964864,6200000,151764864,"Виктор Андреевич","2026-05-30",4,"на Садовое"],["МБ-К1-142","К1",29,2,"2К869",86.9,2121481,184356689,0,184356689,"Тимур Ринатович","2026-05-30",5,"на Садовое"],["МБ-К1-020","К1",5,4,"4К1646",164.6,1076699,177224599,1830000,175394599,"Тимур Ринатович","2026-06-01",5,"на реку"],["МБ-К1-066","К1",13,2,"2К986",98.6,1487938,146710647,0,146710647,"Денис Олегович","2026-06-01",11,"на реку"],["МБ-К1-079","К1",15,2,"2К929",92.9,1417249,131662478,2820000,128842478,"Виктор Андреевич","2026-06-04",6,"на реку"],["МБ-К1-059","К1",12,2,"2К832",83.2,1453008,120890268,3390000,117500268,"Виктор Андреевич","2026-06-06",7,"на Садовое"],["МБ-К4-033","К4",8,1,"1К526",52.6,1126443,59250900,1150000,58100900,"Глеб Аркадьевич","2026-06-06",16,"на улицу"],["МБ-К3-003","К3",2,1,"1К502",50.2,1536920,77153400,1820000,75333400,"Кирилл Евгеньевич","2026-06-08",13,"на реку"],["МБ-К6-059","К6",10,1,"1К571А",57.1,1172172,66931000,0,66931000,"Кирилл Евгеньевич","2026-06-08",22,"в сад"],["МБ-К6-060","К6",10,1,"1К571Б",57.1,1163138,66415200,0,66415200,"Кирилл Евгеньевич","2026-06-08",20,"в сад"],["МБ-К2-018","К2",7,2,"2К742",74.2,1956493,145171800,0,145171800,"Денис Олегович","2026-06-09",8,"на реку"],["МБ-К6-052","К6",9,1,"1К571А",57.1,1116354,63743800,0,63743800,"Ольга Николаевна","2026-06-09",10,"в сад"],["МБ-К1-111","К1",21,4,"4К1646",164.6,1455837,239630800,8730000,230900800,"Виктор Андреевич","2026-06-10",13,"на реку"],["МБ-К1-117","К1",23,3,"3К1121",112.1,1342040,150442728,0,150442728,"Ольга Николаевна","2026-06-10",13,"на Садовое"],["МБ-К1-100","К1",19,2,"К2870",87,1807320,157236802,2580000,154656802,"Марина Павловна","2026-06-11",18,"на Садовое"],["МБ-К6-018","К6",4,1,"1К571Б",57.1,895000,51104500,0,51104500,"Марина Павловна","2026-06-11",18,"в сад"],["МБ-К1-072","К1",14,2,"2К986",98.6,1517696,149644860,4020000,145624860,"Виктор Андреевич","2026-06-15",18,"на реку"],["МБ-К1-089","К1",17,2,"2К832",83.2,1635848,136102564,5330000,130772564,"Виктор Андреевич","2026-06-15",10,"на Садовое"],["МБ-К1-012","К1",4,1,"1К668",66.8,971852,64919682,0,64919682,"Денис Олегович","2026-06-16",12,"во двор"],["МБ-К1-047","К1",10,2,"2К832",83.2,1396586,116195952,3680000,112515952,"Виктор Андреевич","2026-06-16",9,"на Садовое"],["МБ-К6-045","К6",8,1,"1К571А",57.1,1073417,61292100,0,61292100,"Глеб Аркадьевич","2026-06-16",10,"в сад"],["МБ-К1-094","К1",18,2,"К2870",87,1771882,154153727,0,154153727,"Тимур Ринатович","2026-06-19",7,"на Садовое"],["МБ-К6-073","К6",12,1,"1К571А",57.1,1366751,78041500,0,78041500,"Денис Олегович","2026-06-19",10,"в сад"],["МБ-К1-054","К1",11,2,"2К986",98.6,1430159,141013694,5480000,135533694,"Виктор Андреевич","2026-06-20",6,"на реку"],["МБ-К5-001","К5",2,1,"1К505",50.5,1070000,54035000,950000,53085000,"Глеб Аркадьевич","2026-06-22",12,"во двор"],["МБ-К6-040","К6",7,1,"1К658",65.8,965888,63555400,800000,62755400,"Глеб Аркадьевич","2026-06-23",13,"в сад и во двор"],["МБ-К6-061","К6",10,1,"1К658",65.8,1075945,70797200,0,70797200,"Марина Павловна","2026-06-23",11,"в сад и во двор"],["МБ-К1-040","К1",9,2,"К2870",87,1264695,110028500,0,110028500,"Марина Павловна","2026-06-24",16,"на Садовое"],["МБ-К1-088","К1",17,2,"К2870",87,1737139,151131105,0,151131105,"Денис Олегович","2026-06-27",11,"на Садовое"],["МБ-К4-020","К4",5,1,"1К658",65.8,996945,65599000,600000,64999000,"Глеб Аркадьевич","2026-06-27",8,"во двор"],["МБ-К3-005","К3",3,1,"1К519",51.9,1272927,66064900,0,66064900,"Глеб Аркадьевич","2026-06-28",14,"во двор"],["МБ-К1-077","К1",15,2,"2К832",83.2,1572326,130817536,3700000,127117536,"Виктор Андреевич","2026-06-29",8,"на Садовое"],["МБ-К6-054","К6",9,1,"1К658",65.8,1044608,68735200,0,68735200,"Марина Павловна","2026-06-29",18,"в сад и во двор"],["МБ-К1-052","К1",11,2,"К2870",87,1394327,121306421,0,121306421,"Марина Павловна","2026-07-02",18,"на Садовое"],["МБ-К2-001","К2",2,1,"1К6230",62.3,1142605,71184300,0,71184300,"Глеб Аркадьевич","2026-07-03",15,"во двор"],["МБ-К2-010","К2",4,3,"3К1243",123.4,1292318,159472000,0,159472000,"Кирилл Евгеньевич","2026-07-07",8,"на реку и во двор"],["МБ-К3-011","К3",4,1,"1К502",50.2,1599012,80270400,0,80270400,"Ольга Николаевна","2026-07-07",20,"на реку"],["МБ-К1-021","К1",6,1,"1К614",61.4,934033,57349614,1100000,56249614,"Глеб Аркадьевич","2026-07-08",14,"во двор"],["МБ-К1-137","К1",28,3,"3К1121",112.1,1616798,181243096,0,181243096,"Ольга Николаевна","2026-07-08",8,"на Садовое"],["МБ-К1-141","К1",29,3,"3К1121",112.1,1665302,186680389,6770000,179910389,"Виктор Андреевич","2026-07-09",7,"на Садовое"],["МБ-К5-032","К5",6,1,"1К476",47.6,1000021,47601000,750000,46851000,"Глеб Аркадьевич","2026-07-09",13,"на улицу"],["МБ-К1-061","К1",12,2,"2К929",92.9,1362082,126537457,0,126537457,"Марина Павловна","2026-07-10",14,"на реку"],["МБ-К2-013","К2",5,3,"3К1243",123.4,1318164,162661400,0,162661400,"Кирилл Евгеньевич","2026-07-10",13,"на реку и во двор"],["МБ-К5-027","К5",5,2,"2К833",83.3,923564,76932900,960000,75972900,"Денис Олегович","2026-07-11",12,"на улицу"],["МБ-К1-034","К1",8,2,"К2870",87,1252174,108939109,0,108939109,"Денис Олегович","2026-07-12",10,"на Садовое"],["МБ-К1-053","К1",11,2,"2К832",83.2,1424518,118519871,1920000,116599871,"Ольга Николаевна","2026-07-14",20,"на Садовое"],["МБ-К2-006","К2",3,2,"2К742",74.2,1705369,126538400,0,126538400,"Ольга Николаевна","2026-07-15",8,"на реку"],["МБ-К4-039","К4",9,2,"2К935",93.5,1047344,97926700,0,97926700,"Ольга Николаевна","2026-07-15",23,"на улицу и во двор"],["МБ-К6-026","К6",5,1,"1К658",65.8,946856,62303100,0,62303100,"Ольга Николаевна","2026-07-15",14,"в сад и во двор"],["МБ-К1-113","К1",22,3,"3К1121",112.1,1302952,146060901,3200000,142860901,"Виктор Андреевич","2026-07-16",8,"на Садовое"],["МБ-К4-032","К4",8,1,"1К508",50.8,1137061,57762700,0,57762700,"Ольга Николаевна","2026-07-16",14,"на улицу"],["МБ-К6-067","К6",11,1,"1К571Б",57.1,1861023,106264400,0,106264400,"Ольга Николаевна","2026-07-16",12,"в сад"],["МБ-К1-085","К1",16,2,"2К929",92.9,1445594,134295727,1870000,132425727,"Денис Олегович","2026-07-17",11,"на реку"],["МБ-К1-105","К1",20,3,"3К1121",112.1,1252477,140402673,4030000,136372673,"Виктор Андреевич","2026-07-17",10,"на Садовое"],["МБ-К6-068","К6",11,1,"1К658",65.8,1108225,72921200,0,72921200,"Ольга Николаевна","2026-07-17",25,"в сад и во двор"],["МБ-К1-030","К1",7,2,"2К986",98.6,1347539,132867327,0,132867327,"Ольга Николаевна","2026-07-18",11,"на реку"],["МБ-К4-052","К4",12,1,"1К508",50.8,1279772,65012400,0,65012400,"Ольга Николаевна","2026-07-18",16,"на улицу"],["МБ-К6-010","К6",3,1,"1К571А",57.1,875762,50006000,0,50006000,"Ольга Николаевна","2026-07-18",11,"в сад"],["МБ-К1-051","К1",11,1,"1К668",66.8,1083222,72359228,0,72359228,"Виктор Андреевич","2026-07-19",13,"во двор"],["МБ-К1-016","К1",5,1,"1К614",61.4,924785,56781796,0,56781796,"Кирилл Евгеньевич","2026-07-21",15,"во двор"],["МБ-К1-135","К1",27,4,"4К1646",164.6,1654134,272270411,6640000,265630411,"Виктор Андреевич","2026-07-21",7,"на реку"],["МБ-К1-002","К1",2,1,"1К668",66.8,952702,63640508,0,63640508,"Марина Павловна","2026-07-22",10,"во двор"],["МБ-К1-129","К1",26,3,"3К1121",112.1,1523988,170839001,0,170839001,"Тимур Ринатович","2026-07-22",3,"на Садовое"],["МБ-К1-114","К1",22,2,"2К869",86.9,1659871,144242811,0,144242811,"Кирилл Евгеньевич","2026-07-23",10,"на Садовое"],["МБ-К5-026","К5",5,1,"1К489",48.9,993115,48563300,1210000,47353300,"Денис Олегович","2026-07-24",8,"на улицу"],["МБ-К6-032","К6",6,1,"1К571Б",57.1,931158,53169100,0,53169100,"Марина Павловна","2026-07-25",28,"в сад"],["МБ-К4-038","К4",9,1,"1К526",52.6,1160238,61028500,1780000,59248500,"Кирилл Евгеньевич","2026-07-27",19,"на улицу"],["МБ-К5-025","К5",5,1,"1К476",47.6,990120,47129700,0,47129700,"Глеб Аркадьевич","2026-07-27",6,"на улицу"],["МБ-К4-022","К4",6,1,"1К508",50.8,1071789,54446900,0,54446900,"Глеб Аркадьевич","2026-07-28",9,"на улицу"],["МБ-К4-047","К4",11,1,"1К508",50.8,1242498,63118900,1650000,61468900,"Денис Олегович","2026-07-28",9,"на улицу"],["МБ-К1-043","К1",9,2,"2К929",92.9,1296229,120419657,0,120419657,"Марина Павловна","2026-07-30",9,"на реку"],["МБ-К1-091","К1",17,2,"2К929",92.9,1474506,136981642,3950000,133031642,"Виктор Андреевич","2026-07-30",7,"на реку"],["МБ-К2-004","К2",2,3,"3К1243",123.4,1230075,151791300,5420000,146371300,"Виктор Андреевич","2026-07-30",8,"на реку и во двор"],["МБ-К5-037","К5",7,1,"1К498",49.8,1140076,56775800,550000,56225800,"Глеб Аркадьевич","2026-07-30",10,"во двор"],["МБ-К1-106","К1",20,2,"2К869",86.9,1564588,135962683,0,135962683,"Тимур Ринатович","2026-07-31",4,"на Садовое"],["МБ-К1-033","К1",8,1,"1К668",66.8,1011313,67555681,0,67555681,"Ольга Николаевна","2026-08-03",22,"во двор"],["МБ-К4-019","К4",5,2,"2К935",93.5,948979,88729500,0,88729500,"Кирилл Евгеньевич","2026-08-03",17,"на улицу и во двор"],["МБ-К4-049","К4",11,2,"2К935",93.5,1111127,103890400,0,103890400,"Денис Олегович","2026-08-05",15,"на улицу и во двор"],["МБ-К6-006","К6",2,1,"1К643",64.3,913445,58734500,0,58734500,"Глеб Аркадьевич","2026-08-05",9,"во двор"],["МБ-К5-024","К5",5,3,"3К1376",137.6,884117,121654500,0,121654500,"Виктор Андреевич","2026-08-06",16,"во двор и на улицу"],["МБ-К5-034","К5",6,2,"2К833",83.3,932800,77702200,0,77702200,"Кирилл Евгеньевич","2026-08-06",15,"на улицу"],["МБ-К4-004","К4",2,2,"2К935",93.5,921070,86120000,2080000,84040000,"Ольга Николаевна","2026-08-07",17,"на улицу и во двор"],["МБ-К4-029","К4",7,2,"2К935",93.5,987222,92305300,2700000,89605300,"Виктор Андреевич","2026-08-07",9,"на улицу и во двор"],["МБ-К4-037","К4",9,1,"1К508",50.8,1171173,59495600,1440000,58055600,"Ольга Николаевна","2026-08-07",23,"на улицу"],["МБ-К1-044","К1",10,1,"1К614",61.4,1010452,62041733,0,62041733,"Кирилл Евгеньевич","2026-08-08",16,"во двор"],["МБ-К6-056","К6",9,1,"1К62.9",62.9,1162370,73113100,1730000,71383100,"Ольга Николаевна","2026-08-08",32,"во двор"],["МБ-К4-009","К4",3,2,"2К935",93.5,930280,86981200,0,86981200,"Ольга Николаевна","2026-08-10",30,"на улицу и во двор"],["МБ-К5-046","К5",8,1,"1К476",47.6,1040422,49524100,0,49524100,"Глеб Аркадьевич","2026-08-10",9,"на улицу"],["МБ-К5-013","К5",3,2,"2К833",83.3,905366,75417000,0,75417000,"Кирилл Евгеньевич","2026-08-11",27,"на улицу"],["МБ-К1-026","К1",7,1,"1К614",61.4,943373,57923110,950000,56973110,"Глеб Аркадьевич","2026-08-12",21,"во двор"],["МБ-К4-014","К4",4,2,"2К935",93.5,939583,87851000,0,87851000,"Виктор Андреевич","2026-08-12",12,"на улицу и во двор"],["МБ-К5-048","К5",8,2,"2К833",83.3,970485,80841400,0,80841400,"Виктор Андреевич","2026-08-14",13,"на улицу"],["МБ-К1-038","К1",9,1,"1К614",61.4,962335,59087365,0,59087365,"Глеб Аркадьевич","2026-08-15",15,"во двор"],["МБ-К4-034","К4",8,2,"2К935",93.5,1016840,95074500,0,95074500,"Тимур Ринатович","2026-08-15",6,"на улицу и во двор"],["МБ-К4-043","К4",10,1,"1К526",52.6,1195044,62859300,0,62859300,"Денис Олегович","2026-08-15",7,"на улицу"],["МБ-К4-050","К4",11,1,"1К658",65.8,1167302,76808500,0,76808500,"Виктор Андреевич","2026-08-15",13,"во двор"],["МБ-К6-034","К6",6,1,"1К643",64.3,950535,61119400,0,61119400,"Глеб Аркадьевич","2026-08-15",14,"во двор"],["МБ-К6-048","К6",8,1,"1К643",64.3,1008042,64817100,1190000,63627100,"Денис Олегович","2026-08-17",14,"во двор"],["МБ-К1-056","К1",12,1,"1К614",61.4,1030762,63288772,0,63288772,"Денис Олегович","2026-08-19",17,"во двор"],["МБ-К1-050","К1",11,1,"1К614",61.4,1020556,62662150,0,62662150,"Марина Павловна","2026-08-20",22,"во двор"],["МБ-К6-030","К6",6,1,"1К725",72.5,884513,64127200,2050000,62077200,"Марина Павловна","2026-08-20",22,"на улицу и в сад"],["МБ-К6-070","К6",11,1,"1К62.9",62.9,1281514,80607200,1640000,78967200,"Денис Олегович","2026-08-20",22,"во двор"],["МБ-К4-024","К4",6,2,"2К935",93.5,958468,89616800,0,89616800,"Виктор Андреевич","2026-08-21",10,"на улицу и во двор"],["МБ-К6-076","К6",12,1,"1К643",64.3,1156589,74368700,0,74368700,"Виктор Андреевич","2026-08-21",8,"во двор"],["МБ-К1-057","К1",12,1,"1К668",66.8,1094054,73082820,0,73082820,"Виктор Андреевич","2026-08-25",8,"во двор"],["МБ-К4-023","К4",6,1,"1К526",52.6,1061781,55849700,0,55849700,"Глеб Аркадьевич","2026-08-25",11,"на улицу"],["МБ-К4-035","К4",8,1,"1К658",65.8,1068248,70290700,1690000,68600700,"Марина Павловна","2026-08-25",24,"во двор"],["МБ-К5-030","К5",6,1,"1К498",49.8,1117721,55662500,1050000,54612500,"Глеб Аркадьевич","2026-08-25",14,"во двор"],["МБ-К6-071","К6",12,1,"1К719",71.9,994651,71515400,0,71515400,"Ольга Николаевна","2026-08-25",41,"на улицу"],["МБ-К6-001","К6",2,1,"1К719",71.9,843438,60643200,910000,59733200,"Кирилл Евгеньевич","2026-08-26",17,"на улицу"],["МБ-К6-041","К6",7,1,"1К643",64.3,960039,61730500,0,61730500,"Марина Павловна","2026-08-27",21,"во двор"],["МБ-К1-045","К1",10,1,"1К668",66.8,996423,71642800,0,71642800,"Кирилл Евгеньевич","2026-08-28",16,"во двор"],["МБ-К5-038","К5",7,3,"3К1376",137.6,919836,126569400,0,126569400,"Тимур Ринатович","2026-08-29",5,"во двор и на улицу"],["МБ-К6-077","К6",12,1,"1К62.9",62.9,1345590,84637600,0,84637600,"Тимур Ринатович","2026-09-01",8,"во двор"],["МБ-К5-006","К5",2,2,"2К833",83.3,896402,74670300,0,74670300,"Виктор Андреевич","2026-09-02",25,"на улицу"],["МБ-К3-017","К3",6,1,"1К519",51.9,1350840,70108600,0,70108600,"Виктор Андреевич","2026-09-05",11,"во двор"],["МБ-К6-062","К6",10,1,"1К643",64.3,1069431,68764400,1340000,67424400,"Кирилл Евгеньевич","2026-09-05",15,"во двор"],["МБ-К6-064","К6",11,1,"1К719",71.9,965680,69432400,1150000,68282400,"Тимур Ринатович","2026-09-05",6,"на улицу"],["МБ-К3-013","К3",5,1,"1К519",51.9,1324355,68734000,0,68734000,"Виктор Андреевич","2026-09-07",12,"во двор"],["МБ-К6-036","К6",7,1,"1К719",71.9,892225,64151000,1920000,62231000,"Кирилл Евгеньевич","2026-09-08",19,"на улицу"],["МБ-К4-003","К4",2,1,"1К526",52.6,1020352,53670500,0,53670500,"Марина Павловна","2026-09-09",21,"на улицу"],["МБ-К6-043","К6",8,1,"1К719",71.9,901147,64792500,1700000,63092500,"Марина Павловна","2026-09-10",18,"на улицу"],["МБ-К4-030","К4",7,1,"1К658",65.8,1037134,68243400,0,68243400,"Виктор Андреевич","2026-09-11",28,"во двор"],["МБ-К6-050","К6",9,1,"1К719",71.9,919170,66088300,1100000,64988300,"Денис Олегович","2026-09-11",14,"на улицу"],["МБ-К6-051","К6",9,1,"1К725",72.5,920338,66724500,1610000,65114500,"Марина Павловна","2026-09-11",22,"на улицу и в сад"],["МБ-К1-027","К1",7,1,"1К668",66.8,1001300,66886813,1160000,65726813,"Кирилл Евгеньевич","2026-09-13",13,"во двор"],["МБ-К4-017","К4",5,1,"1К508",50.8,1061179,53907900,1160000,52747900,"Марина Павловна","2026-09-13",13,"на улицу"],["МБ-К5-044","К5",8,1,"1К498",49.8,1162878,57911300,1560000,56351300,"Марина Павловна","2026-09-15",35,"во двор"],["МБ-К2-014","К2",6,2,"2К874",87.4,1525047,133289100,0,133289100,"Виктор Андреевич","2026-09-16",10,"во двор и на реку"],["МБ-К5-005","К5",2,1,"1К489",48.9,960734,46979900,650000,46329900,"Глеб Аркадьевич","2026-09-16",15,"на улицу"],["МБ-К4-002","К4",2,1,"1К508",50.8,1029969,52322400,1410000,50912400,"Кирилл Евгеньевич","2026-09-17",17,"на улицу"],["МБ-К5-003","К5",2,3,"3К1376",137.6,834046,114764700,2330000,112434700,"Кирилл Евгеньевич","2026-09-19",14,"во двор и на улицу"],["МБ-К6-023","К6",5,1,"1К725",72.5,875756,63492300,840000,62652300,"Денис Олегович","2026-09-19",21,"на улицу и в сад"],["МБ-К6-037","К6",7,1,"1К725",72.5,893359,64768500,700000,64068500,"Глеб Аркадьевич","2026-09-22",10,"на улицу и в сад"],["МБ-К1-132","К1",27,3,"3К1292",129.2,1240210,160235086,0,160235086,"Виктор Андреевич","2026-09-23",21,"во двор"],["МБ-К6-044","К6",8,1,"1К725",72.5,902292,65416200,0,65416200,"Глеб Аркадьевич","2026-09-24",21,"на улицу и в сад"],["МБ-К1-063","К1",13,1,"1К668",66.8,1104995,73813648,1140000,72673648,"Денис Олегович","2026-09-25",10,"во двор"],["МБ-К1-074","К1",15,1,"1К614",61.4,1104054,67788920,0,67788920,"Глеб Аркадьевич","2026-09-28",18,"во двор"],["МБ-К2-008","К2",4,2,"2К874",87.4,1465827,128113300,0,128113300,"Виктор Андреевич","2026-09-28",10,"во двор и на реку"],["МБ-К2-017","К2",7,2,"2К874",87.4,1555547,135954800,0,135954800,"Виктор Андреевич","2026-09-28",14,"во двор и на реку"],["МБ-К5-020","К5",4,2,"2К833",83.3,914420,76171200,1800000,74371200,"Денис Олегович","2026-09-28",27,"на улицу"],["МБ-К1-092","К1",18,1,"1К614",61.4,1171631,71938144,0,71938144,"Глеб Аркадьевич","2026-09-29",13,"во двор"],["МБ-К1-019","К1",5,2,"2К869",86.9,968215,84137921,0,84137921,"Виктор Андреевич","2026-09-30",12,"на Садовое"],["МБ-К1-069","К1",14,1,"1К668",66.8,1116045,74551785,1020000,73531785,"Денис Олегович","2026-09-30",16,"во двор"],["МБ-К1-087","К1",17,1,"1К668",66.8,1219190,81441861,0,81441861,"Кирилл Евгеньевич","2026-09-30",9,"во двор"],["МБ-К1-140","К1",29,3,"3К1292",129.2,1290314,166708583,0,166708583,"Тимур Ринатович","2026-09-30",9,"во двор"],["МБ-К6-072","К6",12,1,"1К725",72.5,995914,72203800,0,72203800,"Глеб Аркадьевич","2026-09-30",11,"на улицу и в сад"],["МБ-К1-003","К1",2,3,"3К1121",112.1,910906,102112522,null,null,null,null,null,"на Садовое"],["МБ-К1-004","К1",2,2,"2К869",86.9,939740,81663437,null,null,null,null,null,"на Садовое"],["МБ-К1-008","К1",3,3,"3К1121",112.1,920015,103133647,null,null,null,null,null,"на Садовое"],["МБ-К1-009","К1",3,2,"2К869",86.9,949138,82480071,null,null,null,null,null,"на Садовое"],["МБ-К1-013","К1",4,3,"3К1121",112.1,929215,104164984,null,null,null,null,null,"на Садовое"],["МБ-К1-014","К1",4,2,"2К869",86.9,958629,83304872,null,null,null,null,null,"на Садовое"],["МБ-К1-018","К1",5,3,"3К1121",112.1,938507,105206634,null,null,null,null,null,"на Садовое"],["МБ-К1-023","К1",6,3,"3К1121",112.1,947892,106258700,null,null,null,null,null,"на Садовое"],["МБ-К1-024","К1",6,2,"2К869",86.9,977898,84979300,null,null,null,null,null,"на Садовое"],["МБ-К1-025","К1",6,4,"4К1646",164.6,1087466,178996845,null,null,null,null,null,"на реку"],["МБ-К1-028","К1",7,2,"К2870",87,1239776,107860504,null,null,null,null,null,"на Садовое"],["МБ-К1-029","К1",7,2,"2К832",83.2,1342223,111672973,null,null,null,null,null,"на Садовое"],["МБ-К1-032","К1",8,1,"1К614",61.4,952807,58502341,null,null,null,null,null,"во двор"],["МБ-К1-035","К1",8,2,"2К832",83.2,1355645,112789703,null,null,null,null,null,"на Садовое"],["МБ-К1-037","К1",8,2,"2К929",92.9,1283395,119227383,null,null,null,null,null,"на реку"],["МБ-К1-039","К1",9,1,"1К668",66.8,1021426,68231238,null,null,null,null,null,"во двор"],["МБ-К1-048","К1",10,2,"2К986",98.6,1402117,138248719,null,null,null,null,null,"на реку"],["МБ-К1-049","К1",10,2,"2К929",92.9,1309191,121623854,null,null,null,null,null,"на реку"],["МБ-К1-062","К1",13,1,"1К614",61.4,1041069,63921659,null,null,null,null,null,"во двор"],["МБ-К1-068","К1",14,1,"1К614",61.4,1051480,64560876,null,null,null,null,null,"во двор"],["МБ-К1-075","К1",15,1,"1К668",66.8,1171847,78279374,null,null,null,null,null,"во двор"],["МБ-К1-080","К1",16,1,"1К614",61.4,1126135,69144698,null,null,null,null,null,"во двор"],["МБ-К1-081","К1",16,1,"1К668",66.8,1195284,79844962,null,null,null,null,null,"во двор"],["МБ-К1-086","К1",17,1,"1К614",61.4,1148658,70527592,null,null,null,null,null,"во двор"],["МБ-К1-093","К1",18,1,"1К668",66.8,1243573,83070698,null,null,null,null,null,"во двор"],["МБ-К1-098","К1",19,1,"1К614",61.4,1195064,73376907,null,null,null,null,null,"во двор"],["МБ-К1-099","К1",19,1,"1К668",66.8,1268445,84732112,null,null,null,null,null,"во двор"],["МБ-К1-102","К1",19,2,"2К986",98.6,1675659,165220017,null,null,null,null,null,"на реку"],["МБ-К1-104","К1",20,3,"3К1292",129.2,1086905,140428119,null,null,null,null,null,"во двор"],["МБ-К1-108","К1",21,3,"3К1292",129.2,1097774,141832400,null,null,null,null,null,"во двор"],["МБ-К1-112","К1",22,3,"3К1292",129.2,1119729,144669048,null,null,null,null,null,"во двор"],["МБ-К1-115","К1",22,4,"4К1646",164.6,1477675,243225262,null,null,null,null,null,"на реку"],["МБ-К1-116","К1",23,3,"3К1292",129.2,1142124,147562429,null,null,null,null,null,"во двор"],["МБ-К1-119","К1",23,4,"4К1646",164.6,1499840,246873641,null,null,null,null,null,"на реку"],["МБ-К1-120","К1",24,3,"3К1292",129.2,1168677,150993100,null,null,null,null,null,"во двор"],["МБ-К1-122","К1",24,2,"2К869",86.9,1795151,155998600,null,null,null,null,null,"на Садовое"],["МБ-К1-124","К1",25,3,"3К1292",129.2,1192051,154012962,null,null,null,null,null,"во двор"],["МБ-К1-128","К1",26,3,"3К1292",129.2,1215892,157093221,null,null,null,null,null,"во двор"],["МБ-К1-136","К1",28,3,"3К1292",129.2,1265014,163439787,null,null,null,null,null,"во двор"],["МБ-К1-143","К1",29,4,"4К1646",164.6,1754870,288851679,null,null,null,null,null,"на реку"],["МБ-К2-005","К2",3,2,"2К874",87.4,1437086,125601300,null,null,null,null,null,"во двор и на реку"],["МБ-К2-011","К2",5,2,"2К874",87.4,1495144,130675600,null,null,null,null,null,"во двор и на реку"],["МБ-К3-002","К3",2,2,"2К1002",95.2,1418067,135000000,null,null,null,null,null,"на реку и во двор"],["МБ-К3-004","К3",2,2,"2К970",97,1409347,136706700,null,null,null,null,null,"на реку и во двор"],["МБ-К3-006","К3",3,2,"2К952",95.2,1446429,137700000,null,null,null,null,null,"на реку и во двор"],["МБ-К3-008","К3",3,2,"2К970",97,1451619,140807000,null,null,null,null,null,"на реку и во двор"],["МБ-К3-010","К3",4,2,"2К1002",95.2,1475357,140454000,null,null,null,null,null,"на реку и во двор"],["МБ-К3-012","К3",4,2,"2К970",97,1495175,145032000,null,null,null,null,null,"на реку и во двор"],["МБ-К3-014","К3",5,2,"2К1002",95.2,1504863,143263000,null,null,null,null,null,"на реку и во двор"],["МБ-К3-016","К3",5,2,"2К970",97,1540031,149383000,null,null,null,null,null,"на реку и во двор"],["МБ-К3-018","К3",6,2,"2К1002",95.2,1534961,146128300,null,null,null,null,null,"на реку и во двор"],["МБ-К3-020","К3",6,2,"2К970",97,1586232,153864500,null,null,null,null,null,"на реку и во двор"],["МБ-К3-021","К3",7,1,"1К519",51.9,1377842,71510000,null,null,null,null,null,"во двор"],["МБ-К3-022","К3",7,2,"2К1002",95.2,1581008,150512000,null,null,null,null,null,"на реку и во двор"],["МБ-К3-024","К3",7,2,"2К970",97,1649680,160019000,null,null,null,null,null,"на реку и во двор"],["МБ-К4-001","К4",2,3,"3К1046",104.6,1371396,143448000,null,null,null,null,null,"на реку"],["МБ-К4-007","К4",3,1,"1К508",50.8,1040268,52845600,null,null,null,null,null,"на улицу"],["МБ-К4-008","К4",3,1,"1К526",52.6,1030555,54207200,null,null,null,null,null,"на улицу"],["МБ-К4-012","К4",4,1,"1К508",50.8,1050671,53374100,null,null,null,null,null,"на улицу"],["МБ-К4-013","К4",4,1,"1К526",52.6,1040859,54749200,null,null,null,null,null,"на улицу"],["МБ-К4-018","К4",5,1,"1К526",52.6,1051268,55296700,null,null,null,null,null,"на улицу"],["МБ-К4-025","К4",6,1,"1К658",65.8,1006926,66255700,null,null,null,null,null,"во двор"],["МБ-К4-027","К4",7,1,"1К508",50.8,1103943,56080300,null,null,null,null,null,"на улицу"],["МБ-К4-040","К4",9,1,"1К658",65.8,1100295,72399400,null,null,null,null,null,"во двор"],["МБ-К4-044","К4",10,2,"2К935",93.5,1078765,100864500,null,null,null,null,null,"на улицу и во двор"],["МБ-К4-045","К4",10,1,"1К658",65.8,1133304,74571400,null,null,null,null,null,"во двор"],["МБ-К4-048","К4",11,1,"1К526",52.6,1230895,64745100,null,null,null,null,null,"на улицу"],["МБ-К4-053","К4",12,1,"1К526",52.6,1267823,66687500,null,null,null,null,null,"на улицу"],["МБ-К4-054","К4",12,2,"2К935",93.5,1144461,107007100,null,null,null,null,null,"на улицу и во двор"],["МБ-К4-055","К4",12,1,"1К658",65.8,1202322,79112800,null,null,null,null,null,"во двор"],["МБ-К5-002","К5",2,1,"1К498",49.8,1074108,53490600,null,null,null,null,null,"во двор"],["МБ-К5-004","К5",2,1,"1К476",47.6,961000,45743600,null,null,null,null,null,"на улицу"],["МБ-К5-007","К5",2,2,"2К1014",101.4,884986,89737600,null,null,null,null,null,"в окна ЖК и на улицу"],["МБ-К5-010","К5",3,3,"3К1376",137.6,850727,117060000,null,null,null,null,null,"во двор и на улицу"],["МБ-К5-011","К5",3,1,"1К476",47.6,970609,46201000,null,null,null,null,null,"на улицу"],["МБ-К5-012","К5",3,1,"1К489",48.9,970342,47449700,null,null,null,null,null,"на улицу"],["МБ-К5-014","К5",3,2,"2К1014",101.4,890343,90280800,null,null,null,null,null,"в окна ЖК и на улицу"],["МБ-К5-017","К5",4,3,"3К1376",137.6,866781,119269100,null,null,null,null,null,"во двор и на улицу"],["МБ-К5-018","К5",4,1,"1К476",47.6,980315,46663000,null,null,null,null,null,"на улицу"],["МБ-К5-019","К5",4,1,"1К489",48.9,980045,47924200,null,null,null,null,null,"на улицу"],["МБ-К5-021","К5",4,2,"2К1014",101.4,894795,90732200,null,null,null,null,null,"в окна ЖК и на улицу"],["МБ-К5-022","К5",5,1,"1К505",50.5,1102422,55672300,null,null,null,null,null,"во двор"],["МБ-К5-023","К5",5,1,"1К498",49.8,1106655,55111400,null,null,null,null,null,"во двор"],["МБ-К5-028","К5",5,2,"2К1014",101.4,899269,91185900,null,null,null,null,null,"в окна ЖК и на улицу"],["МБ-К5-029","К5",6,1,"1К505",50.5,1113446,56229000,null,null,null,null,null,"во двор"],["МБ-К5-031","К5",6,3,"3К1376",137.6,901799,124087600,null,null,null,null,null,"во двор и на улицу"],["МБ-К5-033","К5",6,1,"1К489",48.9,1003045,49048900,null,null,null,null,null,"на улицу"],["МБ-К5-035","К5",6,2,"2К1014",101.4,903765,91641800,null,null,null,null,null,"в окна ЖК и на улицу"],["МБ-К5-036","К5",7,1,"1К505",50.5,1135715,57353600,null,null,null,null,null,"во двор"],["МБ-К5-039","К5",7,1,"1К476",47.6,1020021,48553000,null,null,null,null,null,"на улицу"],["МБ-К5-040","К5",7,1,"1К489",48.9,1023106,50029900,null,null,null,null,null,"на улицу"],["МБ-К5-041","К5",7,2,"2К833",83.3,951456,79256300,null,null,null,null,null,"на улицу"],["МБ-К5-042","К5",7,2,"2К1014",101.4,908284,92100000,null,null,null,null,null,"в окна ЖК и на улицу"],["МБ-К5-043","К5",8,1,"1К505",50.5,1158430,58500700,null,null,null,null,null,"во двор"],["МБ-К5-045","К5",8,3,"3К1376",137.6,947430,130366400,null,null,null,null,null,"во двор и на улицу"],["МБ-К5-049","К5",8,2,"2К1014",101.4,978304,99200000,null,null,null,null,null,"в окна ЖК и на улицу"],["МБ-К6-002","К6",2,1,"1К725",72.5,850000,61625000,null,null,null,null,null,"на улицу и в сад"],["МБ-К6-007","К6",2,1,"1К62.9",62.9,950070,59759400,null,null,null,null,null,"во двор и окна ЖК"],["МБ-К6-008","К6",3,1,"1К719",71.9,851872,61249600,null,null,null,null,null,"на улицу"],["МБ-К6-009","К6",3,1,"1К725",72.5,858501,62241300,null,null,null,null,null,"на улицу и в сад"],["МБ-К6-014","К6",3,1,"1К62.9",62.9,969072,60954600,null,null,null,null,null,"во двор и окна ЖК"],["МБ-К6-015","К6",4,1,"1К719",71.9,860391,61862100,null,null,null,null,null,"на улицу"],["МБ-К6-016","К6",4,1,"1К725",72.5,867086,62863700,null,null,null,null,null,"на улицу и в сад"],["МБ-К6-017","К6",4,1,"1К571А",57.1,893277,51006100,null,null,null,null,null,"в сад"],["МБ-К6-021","К6",4,1,"1К62.9",62.9,988453,62173700,null,null,null,null,null,"во двор и окна ЖК"],["МБ-К6-022","К6",5,1,"1К719",71.9,874644,62886900,null,null,null,null,null,"на улицу"],["МБ-К6-025","К6",5,1,"1К571Б",57.1,912900,52126600,null,null,null,null,null,"в сад"],["МБ-К6-028","К6",5,1,"1К62.9",62.9,1008223,63417200,null,null,null,null,null,"во двор и окна ЖК"],["МБ-К6-029","К6",6,1,"1К719",71.9,883391,63515800,null,null,null,null,null,"на улицу"],["МБ-К6-035","К6",6,1,"1К62.9",62.9,1028386,64685500,null,null,null,null,null,"во двор и окна ЖК"],["МБ-К6-042","К6",7,1,"1К62.9",62.9,1048954,65979200,null,null,null,null,null,"во двор и окна ЖК"],["МБ-К6-047","К6",8,1,"1К658",65.8,1014182,66733200,null,null,null,null,null,"в сад и во двор"],["МБ-К6-049","К6",8,1,"1К62.9",62.9,1101402,69278200,null,null,null,null,null,"во двор и окна ЖК"],["МБ-К6-055","К6",9,1,"1К643",64.3,1038283,66761600,null,null,null,null,null,"во двор"],["МБ-К6-057","К6",10,1,"1К719",71.9,937554,67410100,null,null,null,null,null,"на улицу"],["МБ-К6-058","К6",10,1,"1К725",72.5,938745,68059000,null,null,null,null,null,"на улицу и в сад"],["МБ-К6-063","К6",10,1,"1К62.9",62.9,1220490,76768800,null,null,null,null,null,"во двор"],["МБ-К6-065","К6",11,1,"1К725",72.5,966908,70100800,null,null,null,null,null,"на улицу и в сад"],["МБ-К6-069","К6",11,1,"1К643",64.3,1101515,70827400,null,null,null,null,null,"во двор"]];
+// Одна строка — квартира; дата сделки есть только у проданных квартир.
+const homes = RAW.map(r => ({
+  id:r[0], building:r[1], floor:r[2], rooms:r[3], plan:r[4], area:r[5],
+  ppm:r[6], cost:r[7], discount:r[8], deal:r[9], manager:r[10],
+  date:r[11], days:r[12], view:r[13], sold:!!r[11]
+}));
+const state = {homeId:null,building:null,rooms:null,view:null,floorBand:null,week:null,manager:null,periodPreset:null,dateFrom:null,dateTo:null};
+const buildingNames = ['К1','К2','К3','К4','К5','К6'];
+const roomNumbers = [1,2,3,4];
+const floorBands = ['2–5','6–10','11–15','16–20','21–29'];
+const nf = new Intl.NumberFormat('ru-RU');
+const one = new Intl.NumberFormat('ru-RU',{minimumFractionDigits:1,maximumFractionDigits:1});
+const moneyDigits = new Intl.NumberFormat('ru-RU',{minimumFractionDigits:1,maximumFractionDigits:2});
+const moneyFrame = new Intl.NumberFormat('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2});
+const dateFormat = new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'short',timeZone:'UTC'});
+const monthFormat = new Intl.DateTimeFormat('ru-RU',{month:'short',timeZone:'UTC'});
+const esc = value => String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pct = (n,d) => d ? Math.round(100*n/d) : 0;
+const sum = (items,key) => items.reduce((a,x)=>a+(Number(x[key])||0),0);
+const median = values => { const a=values.filter(Number.isFinite).sort((x,y)=>x-y); if(!a.length)return null; const m=Math.floor(a.length/2); return a.length%2?a[m]:(a[m-1]+a[m])/2; };
+const rub = value => value>=1e9 ? `${moneyDigits.format(value/1e9)} млрд ₽` : value>=1e6 ? `${moneyDigits.format(value/1e6)} млн ₽` : `${nf.format(Math.round(value))} ₽`;
+const roomShort = n => `${n} комн.`;
+const typeLabel = h => `${roomShort(h.rooms)} · ${one.format(h.area)} м²`;
+const floorBand = floor => floor<=5?'2–5':floor<=10?'6–10':floor<=15?'11–15':floor<=20?'16–20':'21–29';
+const dateObj = iso => new Date(`${iso}T12:00:00Z`);
+const isoDate = date => date.toISOString().slice(0,10);
+const plusDays = (iso,n) => {const d=dateObj(iso);d.setUTCDate(d.getUTCDate()+n);return isoDate(d);};
+const weekOf = iso => {const d=dateObj(iso);d.setUTCDate(d.getUTCDate()-(d.getUTCDay()+6)%7);return isoDate(d);};
+const weekText = iso => `${dateFormat.format(dateObj(iso))} — ${dateFormat.format(dateObj(plusDays(iso,6)))}`;
+const allWeeks = (()=>{let w=weekOf(homes.filter(h=>h.sold).map(h=>h.date).sort()[0]);const last=weekOf(homes.filter(h=>h.sold).map(h=>h.date).sort().at(-1));const a=[];while(w<=last){a.push(w);w=plusDays(w,7)}return a})();
+const dataEnd=homes.filter(h=>h.sold).map(h=>h.date).sort().at(-1);
+const sparkCeilings=Object.fromEntries([['revenue','deal'],['discount','discount'],['sales',null]].map(([id,key])=>[id,Math.max(1,...allWeeks.map(w=>{const items=homes.filter(h=>h.sold&&weekOf(h.date)===w);return key?sum(items,key):items.length}))]));
+const lastWeekIncomplete = dateObj('2026-09-30').getUTCDay()!==0;
+const timeline={index:null,playing:false,timer:null,delay:115,lastMetrics:null,lastManagerValues:null};
+const timelineEnd=()=>timeline.index===null?null:plusDays(allWeeks[timeline.index],6);
+const timelineLast=()=>timeline.index===allWeeks.length-1&&lastWeekIncomplete;
+const soldAt=h=>h.sold&&(timeline.index===null||h.date<=timelineEnd());
+const inPeriod=h=>(!state.dateFrom||h.date>=state.dateFrom)&&(!state.dateTo||h.date<=state.dateTo);
+const selectedSale=h=>soldAt(h)&&inPeriod(h)&&(!state.manager||h.manager===state.manager)&&(!state.week||weekOf(h.date)===state.week);
+function periodRange(preset){
+  const days={'last7':7,'last30':30,'last90':90}[preset];
+  if(days)return [plusDays(dataEnd,1-days),dataEnd];
+  return [null,null];
+}
+function periodLabel(preset,from,to){
+  const names={'last7':'Последние 7 дней','last30':'Последние 30 дней','last90':'Последние 90 дней'};
+  if(preset==='custom')return from&&to?`${dateFormat.format(dateObj(from))} — ${dateFormat.format(dateObj(to))}`:from?`С ${dateFormat.format(dateObj(from))}`:to?`До ${dateFormat.format(dateObj(to))}`:'Весь период';
+  return names[preset]||'Весь период';
+}
+function pauseTimeline(){if(timeline.timer)clearTimeout(timeline.timer);timeline.timer=null;timeline.playing=false}
+function scheduleTimeline(){
+  if(!timeline.playing)return;
+  timeline.timer=setTimeout(()=>{
+    timeline.timer=null;
+    if(timeline.index>=allWeeks.length-2){
+      timeline.index=allWeeks.length-1;renderAll();
+      timeline.timer=setTimeout(()=>{timeline.timer=null;closeTimeline()},220);
+    }
+    else{timeline.index++;renderAll();scheduleTimeline()}
+  },timeline.delay);
+}
+function closeTimeline(){pauseTimeline();timeline.index=null;timeline.lastMetrics=null;timeline.lastManagerValues=null;renderAll()}
+function animateWidth(el,from,to){
+  if(timeline.index===null||!window.requestAnimationFrame||window.matchMedia?.('(prefers-reduced-motion: reduce)').matches){el.style.width=to;return}
+  if(el.dataset.widthAnimated){el.style.width=to;return}
+  el.dataset.widthAnimated='1';el.style.width=from;
+  window.requestAnimationFrame(()=>window.requestAnimationFrame(()=>{if(el.isConnected)el.style.width=to}));
+}
+function tweenText(el,from,to,format){
+  if(timeline.index===null||!window.requestAnimationFrame||window.matchMedia?.('(prefers-reduced-motion: reduce)').matches){el.textContent=format(to);return}
+  if(el._tweenFrame)window.cancelAnimationFrame?.(el._tweenFrame);
+  from=el._numericValue??from;
+  el.textContent=format(from);
+  let started=null;
+  const frame=now=>{
+    if(!el.isConnected)return;
+    if(started===null)started=now;
+    const t=Math.min(1,(now-started)/timeline.delay),ease=t*t*(3-2*t);
+    el._numericValue=from+(to-from)*ease;
+    el.textContent=format(el._numericValue);
+    if(t<1)el._tweenFrame=window.requestAnimationFrame(frame);
+    else el._tweenFrame=null;
+  };
+  el._tweenFrame=window.requestAnimationFrame(frame);
+}
+
+const tooltip = document.getElementById('tooltip');
+function positionTip(x,y){
+  const w=tooltip.offsetWidth,h=tooltip.offsetHeight;
+  const left=x+w+18<innerWidth?x+14:Math.max(12,x-w-14);
+  const top=y+h+18<innerHeight?y+14:Math.max(12,y-h-14);
+  tooltip.style.left=Math.max(12,Math.min(left,innerWidth-w-12))+'px';
+  tooltip.style.top=Math.max(12,Math.min(top,innerHeight-h-12))+'px';
+}
+function bindTip(el,render){
+  const show=e=>{tooltip.innerHTML=render();tooltip.hidden=false;const r=el.getBoundingClientRect();positionTip(e.clientX||r.right,e.clientY||r.top);tooltip.classList.add('is-visible')};
+  el.addEventListener('mouseenter',show);
+  el.addEventListener('mousemove',e=>positionTip(e.clientX,e.clientY));
+  el.addEventListener('mouseleave',()=>tooltip.classList.remove('is-visible'));
+  el.addEventListener('focus',show);
+  el.addEventListener('blur',()=>tooltip.classList.remove('is-visible'));
+}
+function tip(kicker,title,status,rows=[],hint='',unsold=false){
+  const grid=rows.length?`<div class="tip-grid">${rows.map(([a,b])=>`<span>${esc(a)}</span><span>${esc(b)}</span>`).join('')}</div>`:'';
+  return `<div class="tip-kicker">${esc(kicker)}</div><div class="tip-title">${esc(title)}</div><div class="tip-status ${unsold?'unsold':''}">${esc(status)}</div>${grid}${hint?`<div class="tip-hint">${esc(hint)}</div>`:''}`;
+}
+function homeTip(h){
+  const rows=[['Вид',h.view],['Цена за м²',`${nf.format(h.ppm)} ₽`],['Стоимость',`${nf.format(h.cost)} ₽`]];
+  if(soldAt(h)){rows.push(['Сумма сделки',`${nf.format(h.deal)} ₽`],['Скидка',`${nf.format(h.discount)} ₽`],['Менеджер',h.manager]);}
+  const status=soldAt(h)?`Продана · ${h.date}`:timeline.index!==null?'В продаже на этой неделе':'В продаже';
+  return tip(`${h.building} · ${h.floor} этаж · квартира № ${h.id}`,typeLabel(h),status,rows,state.homeId===h.id?'Нажмите, чтобы снять выбор квартиры':'Нажмите, чтобы выбрать квартиру',!soldAt(h));
+}
+function inScope(h,omit=[]){
+  return (omit.includes('homeId')||!state.homeId||h.id===state.homeId)
+    && (omit.includes('building')||!state.building||h.building===state.building)
+    && (omit.includes('rooms')||!state.rooms||h.rooms===state.rooms)
+    && (omit.includes('view')||!state.view||h.view===state.view)
+    && (omit.includes('floorBand')||!state.floorBand||floorBand(h.floor)===state.floorBand);
+}
+const scoped = (omit=[]) => homes.filter(h=>inScope(h,omit));
+const dealFocusActive = () => timeline.index!==null||!!(state.homeId||state.week||state.manager||state.dateFrom||state.dateTo);
+const focusedDeal = h => h.sold && inPeriod(h) && (!state.week||weekOf(h.date)===state.week) && (!state.manager||h.manager===state.manager);
+function stopPlayback(){
+  if(timeline.index===null)return;
+  pauseTimeline();timeline.index=null;timeline.lastMetrics=null;timeline.lastManagerValues=null;
+}
+function setFilter(key,value){stopPlayback();state.homeId=null;state[key]=state[key]===value?null:value;renderAll()}
+function setPair(key1,value1,key2,value2){
+  stopPlayback();
+  const clear=state[key1]===value1&&state[key2]===value2;
+  state.homeId=null;
+  state[key1]=clear?null:value1;state[key2]=clear?null:value2;renderAll();
+}
+function selectHome(h){
+  const clear=state.homeId===h.id;
+  stopPlayback();
+  Object.keys(state).forEach(key=>state[key]=null);
+  state.homeId=clear?null:h.id;
+  renderAll();
+}
+function resetFilters(){stopPlayback();closePeriod();Object.keys(state).forEach(k=>state[k]=null);renderAll()}
+function activate(el,fn){el.addEventListener('click',fn);el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();fn()}})}
+
+function renderFilters(){
+  const entries=[
+    ['homeId',state.homeId?`Квартира ${state.homeId}`:null],
+    ['periodPreset',state.periodPreset?`Период: ${periodLabel(state.periodPreset,state.dateFrom,state.dateTo)}`:null],
+    ['building',state.building?`Корпус ${state.building}`:null],
+    ['rooms',state.rooms?roomShort(state.rooms):null],
+    ['view',state.view?`Вид: ${state.view}`:null],
+    ['floorBand',state.floorBand?`Этажи ${state.floorBand}`:null],
+    ['week',state.week?`Неделя ${weekText(state.week)}`:null],
+    ['manager',state.manager?`Менеджер: ${state.manager}`:null]
+  ].filter(([,label])=>label);
+  const box=document.getElementById('filter-chips');
+  box.innerHTML=entries.length?entries.map(([key,label])=>`<button class="chip" type="button" data-key="${key}" aria-label="Снять фильтр ${esc(label)}">${esc(label)}</button>`).join(''):'';
+  box.querySelectorAll('.chip').forEach(button=>button.addEventListener('click',()=>{stopPlayback();state[button.dataset.key]=null;if(button.dataset.key==='periodPreset'){state.dateFrom=null;state.dateTo=null}renderAll()}));
+  document.getElementById('reset-filters').hidden=!entries.length;
+  document.getElementById('period-trigger-text').textContent=periodLabel(state.periodPreset,state.dateFrom,state.dateTo);
+  document.querySelectorAll('#period-popover [data-period]').forEach(button=>button.classList.toggle('active',(state.periodPreset||'all')===button.dataset.period));
+  document.getElementById('building-select').value=state.building||'';
+  document.getElementById('rooms-select').value=state.rooms||'';
+  document.getElementById('manager-select').value=state.manager||'';
+  document.getElementById('focus-legend').hidden=!dealFocusActive();
+  document.getElementById('focus-legend-label').textContent=state.homeId?'Выбранная квартира':timeline.index!==null?'Сделки этой недели':'Выбранные сделки';
+  document.getElementById('unsold-legend-label').textContent='В продаже';
+  document.querySelector('.map-panel').classList.toggle('is-animating',timeline.index!==null);
+  const floors=document.getElementById('floor-bands');
+  floors.innerHTML=floorBands.map(b=>`<button type="button" data-band="${b}" class="${state.floorBand===b?'active':''}" aria-pressed="${state.floorBand===b}">${b}</button>`).join('');
+  floors.querySelectorAll('button').forEach(button=>button.addEventListener('click',()=>setFilter('floorBand',button.dataset.band)));
+  const views=[...new Set(homes.map(h=>h.view))].sort((a,b)=>homes.filter(h=>h.view===b).length-homes.filter(h=>h.view===a).length||a.localeCompare(b,'ru'));
+  const select=document.getElementById('view-select');
+  select.innerHTML='<option value="">Все виды</option>'+views.map(v=>`<option value="${esc(v)}" ${state.view===v?'selected':''}>${esc(v)}</option>`).join('');
+  select.onchange=()=>{stopPlayback();state.homeId=null;state.view=select.value||null;renderAll()};
+}
+
+function renderMetrics(){
+  const base=scoped(),allSold=base.filter(selectedSale),allSoldEver=base.filter(h=>h.sold);
+  const dealPool=allSold;
+  const weekly=allWeeks.map(w=>allSoldEver.filter(h=>inPeriod(h)&&(!state.manager||h.manager===state.manager)&&weekOf(h.date)===w));
+  const chosenIndex=timeline.index!==null?timeline.index:state.week?allWeeks.indexOf(state.week):allWeeks.length-1;
+  const current=timeline.index!==null?dealPool:state.week?weekly[chosenIndex]:dealPool;
+  const sparkEnd=timeline.index!==null||state.week?chosenIndex+1:allWeeks.length;
+  const moneySparkCount=allWeeks.length,salesSparkCount=allWeeks.length;
+  const fields=[
+    ['revenue','Выручка',rub(sum(current,'deal')),'deal','#426468','line'],
+    ['discount','Скидки',rub(sum(current,'discount')),'discount','#b27b5c','line'],
+    ['sales','Количество продаж',nf.format(current.length),null,'#426468','bar']
+  ];
+  const period=timeline.index!==null?'накопленно':state.week?'выбранная неделя':state.periodPreset?'выбранный период':'март — сентябрь 2026';
+  const cards=fields.filter(([id])=>id!=='sales').map(([id,label,value])=>`<div id="metric-${id}" class="factoid-card"><div class="factoid-head"><span class="factoid-label">${esc(label)}</span><span class="factoid-period">${esc(period)}</span></div><strong class="factoid-value">${esc(value)}</strong><svg id="spark-${id}" class="factoid-spark" role="group" aria-label="${esc(label)} по ${moneySparkCount} неделям; наведите на неделю для значения" viewBox="0 0 240 75"></svg><div class="factoid-foot"><span id="wow-${id}" class="factoid-wow"></span></div></div>`).join('');
+  const rate=pct(allSold.length,base.length);
+  const filteredDeals=!!(state.manager||state.week||state.dateFrom||state.dateTo);
+  const stockLabel=filteredDeals?'Продажи квартир в выборке':'Проданные квартиры';
+  const rateLabel=filteredDeals?`${rate}% в выборке`:`${rate}% продано`;
+  const metricsBox=document.getElementById('metrics');
+  const buildCards=timeline.index===null||metricsBox.dataset.playback!=='1';
+  if(buildCards)metricsBox.innerHTML=`<div id="metric-stock" class="factoid-card factoid-stock"><div class="factoid-head"><span class="factoid-label">${stockLabel}</span><span class="factoid-period">${timelineLast()?'по 30 сентября':timeline.index!==null?'к концу недели':state.periodPreset?'выбранный период':'весь период'}</span></div><div class="factoid-sales-summary"><strong class="factoid-value">${nf.format(allSold.length)} / ${nf.format(base.length)}</strong><span class="factoid-rate">${rateLabel}</span></div><div class="stock-track" role="img" aria-label="${rateLabel}"><span style="width:${rate}%"></span></div><svg id="spark-sales" class="factoid-spark" role="group" aria-label="Продажи по ${salesSparkCount} неделям; наведите на неделю для числа сделок" viewBox="0 0 240 75"></svg><div class="factoid-foot"><span id="wow-sales" class="factoid-wow"></span></div></div>`+cards;
+  metricsBox.dataset.playback=timeline.index!==null?'1':'0';
+  document.querySelector('#metric-stock .factoid-period').textContent=timelineLast()?'по 30 сентября':timeline.index!==null?'к концу недели':state.periodPreset?'выбранный период':'весь период';
+  document.querySelector('#metric-stock .factoid-rate').textContent=rateLabel;
+  document.querySelector('#metric-stock .stock-track').setAttribute('aria-label',rateLabel);
+  const metricValues={stock:allSold.length,revenue:sum(current,'deal'),discount:sum(current,'discount')};
+  if(timeline.index!==null){
+    const before=timeline.lastMetrics||{stock:0,revenue:0,discount:0};
+    tweenText(document.querySelector('#metric-stock .factoid-value'),before.stock,metricValues.stock,v=>`${nf.format(Math.round(v))} / ${nf.format(base.length)}`);
+    tweenText(document.querySelector('#metric-revenue .factoid-value'),before.revenue,metricValues.revenue,v=>`${moneyFrame.format(v/1e9)} млрд ₽`);
+    tweenText(document.querySelector('#metric-discount .factoid-value'),before.discount,metricValues.discount,v=>`${moneyFrame.format(v/1e6)} млн ₽`);
+    animateWidth(document.querySelector('#metric-stock .stock-track span'),`${pct(before.stock,base.length)}%`,`${rate}%`);
+    timeline.lastMetrics=metricValues;
+  }else timeline.lastMetrics=null;
+  for(const [id,, ,key,color,kind] of fields){
+    const values=weekly.map(items=>key?sum(items,key):items.length);
+    drawSpark(document.getElementById(`spark-${id}`),values,0,sparkEnd,color,kind,id);
+    const wow=document.getElementById(`wow-${id}`);
+    const weekLabel=dateFormat.format(dateObj(allWeeks[chosenIndex]));
+    if(lastWeekIncomplete&&chosenIndex===allWeeks.length-1){
+      wow.textContent='';
+      continue;
+    }
+    const now=values[chosenIndex],previous=chosenIndex>0?values[chosenIndex-1]:null;
+    const change=previous===null?'нет сравнения':previous===0?(now===0?'0% WoW':'с нуля'):`${now>=previous?'+':''}${Math.round(100*(now-previous)/previous)}% WoW`;
+    wow.textContent=timeline.index!==null?`За неделю: ${id==='sales'?`${nf.format(now)} сделок`:rub(now)} · ${change}`:`${weekLabel} · ${id==='sales'?`${nf.format(now)} сделок · `:''}${change}`;
+  }
+}
+// Монотонная кубическая интерполяция проходит через реальные недельные значения
+// и не добавляет ложных максимумов между точками.
+function smoothSparkPath(values,pointX,pointY){
+  if(!values.length)return '';
+  const xs=values.map((_,i)=>pointX(i)),ys=values.map(pointY);
+  if(values.length===1)return `M ${xs[0].toFixed(2)} ${ys[0].toFixed(2)}`;
+  const delta=ys.slice(1).map((y,i)=>(y-ys[i])/(xs[i+1]-xs[i]));
+  const slopes=values.map((_,i)=>{
+    if(i===0)return delta[0];
+    if(i===values.length-1)return delta.at(-1);
+    const a=delta[i-1],b=delta[i];
+    return a*b<=0?0:2*a*b/(a+b);
+  });
+  const parts=[`M ${xs[0].toFixed(2)} ${ys[0].toFixed(2)}`];
+  for(let i=0;i<values.length-1;i++){
+    const dx=xs[i+1]-xs[i],rise=ys[i+1]-ys[i];
+    let m0=slopes[i],m1=slopes[i+1];
+    if(rise===0){m0=0;m1=0}
+    else{
+      const limit=3*Math.abs(rise/dx);
+      m0=Math.sign(m0)===Math.sign(rise)?Math.sign(m0)*Math.min(Math.abs(m0),limit):0;
+      m1=Math.sign(m1)===Math.sign(rise)?Math.sign(m1)*Math.min(Math.abs(m1),limit):0;
+    }
+    parts.push(`C ${(xs[i]+dx/3).toFixed(2)} ${(ys[i]+m0*dx/3).toFixed(2)} ${(xs[i+1]-dx/3).toFixed(2)} ${(ys[i+1]-m1*dx/3).toFixed(2)} ${xs[i+1].toFixed(2)} ${ys[i+1].toFixed(2)}`);
+  }
+  return parts.join(' ');
+}
+function revealSpark(clip,target){
+  if(clip._frame)window.cancelAnimationFrame?.(clip._frame);
+  const from=Number(clip.getAttribute('width')),duration=timeline.delay*.88;
+  let started=null;
+  const frame=now=>{
+    if(!clip.isConnected)return;
+    if(started===null)started=now;
+    const t=Math.min(1,(now-started)/duration);
+    clip.setAttribute('width',(from+(target-from)*t).toFixed(2));
+    if(t<1)clip._frame=window.requestAnimationFrame(frame);
+    else clip._frame=null;
+  };
+  clip._frame=window.requestAnimationFrame(frame);
+}
+function drawSpark(svg,allValues,start,end,color,kind,id){
+  const width=Math.max(160,Math.round(svg.clientWidth||svg.getBoundingClientRect().width||240));
+  svg.setAttribute('viewBox',`0 0 ${width} 75`);
+  const values=allValues.slice(start,end),animated=timeline.index!==null,x0=18,x1=width-18,top=3,bottom=49;
+  const max=sparkCeilings[id],slots=allWeeks.length,step=(x1-x0)/Math.max(1,slots-1);
+  const pointX=i=>x0+i*step;
+  const pointY=v=>bottom-v/max*(bottom-top);
+  const valueLabel=v=>id==='sales'?`${nf.format(v)} сделок`:rub(v);
+  const changeLabel=(v,previous)=>previous===null?'Нет предыдущей недели':previous===0?(v===0?'0% к предыдущей неделе':'Рост с нуля'):`${v>=previous?'+':''}${Math.round(100*(v-previous)/previous)}% к предыдущей неделе`;
+  const signature=allValues.join(',');
+  const cache=svg._sparkCache;
+  if(animated&&kind==='line'&&cache?.id===id&&cache.width===width&&cache.signature===signature){
+    revealSpark(cache.clip,pointX(end-1)+3);
+    cache.hits.forEach((hit,i)=>{hit.style.pointerEvents=i<end?'auto':'none';hit.setAttribute('tabindex',i<end?0:-1)});
+    return;
+  }
+  svg.replaceChildren();svg._sparkCache=null;
+  addSvg(svg,'line',{x1:x0,y1:bottom,x2:x1,y2:bottom,stroke:'#e1e7df','stroke-width':1});
+  if(kind==='bar'){
+    const barWidth=Math.min(32,step*.65);
+    values.forEach((v,i)=>{
+      const latest=animated&&i===values.length-1;
+      const bar=addSvg(svg,'rect',{x:pointX(i)-barWidth/2,y:pointY(v),width:barWidth,height:Math.max(0,bottom-pointY(v)),rx:1,fill:color,opacity:i===values.length-1?1:.52,class:latest?'spark-new-bar':''});
+      if(latest){bar.style.transform='scaleY(0)';if(window.requestAnimationFrame)window.requestAnimationFrame(()=>window.requestAnimationFrame(()=>{if(bar.isConnected)bar.style.transform='scaleY(1)'}));else bar.style.transform='scaleY(1)'}
+    });
+  }else{
+    const pathValues=animated?allValues:values;
+    if(animated){
+      const defs=addSvg(svg,'defs'),clipPath=addSvg(defs,'clipPath',{id:`spark-clip-${id}`});
+      const clip=addSvg(clipPath,'rect',{x:0,y:0,width:pointX(end-1)+3,height:54});
+      addSvg(svg,'path',{d:smoothSparkPath(pathValues,pointX,pointY),fill:'none',stroke:color,'stroke-width':2.3,'stroke-linejoin':'round','stroke-linecap':'round','clip-path':`url(#spark-clip-${id})`});
+      svg._sparkCache={id,width,signature,clip,hits:[]};
+    }else{
+      addSvg(svg,'path',{d:smoothSparkPath(pathValues,pointX,pointY),fill:'none',stroke:color,'stroke-width':2.3,'stroke-linejoin':'round','stroke-linecap':'round'});
+      if(values.length)addSvg(svg,'circle',{cx:pointX(values.length-1),cy:pointY(values.at(-1)),r:3.2,fill:color,'pointer-events':'none'});
+    }
+  }
+  const shown=animated&&kind==='line'?allValues:values;
+  const labelIndices=[0,Math.floor((allWeeks.length-1)/2),allWeeks.length-1].filter(i=>i<shown.length);
+  labelIndices.forEach(i=>addSvg(svg,'text',{x:pointX(i),y:69,'text-anchor':pointX(i)<55?'start':pointX(i)>width-55?'end':'middle',class:'spark-date'},dateFormat.format(dateObj(allWeeks[start+i]))));
+  shown.forEach((v,i)=>{
+    const index=start+i,week=allWeeks[index],previous=index>0?allValues[index-1]:null;
+    const hitLeft=i===0?0:(pointX(i-1)+pointX(i))/2;
+    const hitRight=i===shown.length-1?width:(pointX(i)+pointX(i+1))/2;
+    const comparison=lastWeekIncomplete&&index===allWeeks.length-1?'Неполная неделя':changeLabel(v,previous);
+    const hit=addSvg(svg,'rect',{x:hitLeft,y:0,width:hitRight-hitLeft,height:54,fill:'transparent',class:'spark-hit',tabindex:animated&&i>=end?-1:0,'aria-label':`${weekText(week)}: ${valueLabel(v)}; ${comparison}. Нажмите для выбора недели.`});
+    if(animated&&i>=end)hit.style.pointerEvents='none';
+    bindTip(hit,()=>tip(`Неделя ${weekText(week)}`,valueLabel(v),comparison,[],'Нажмите для выбора недели'));
+    activate(hit,()=>setFilter('week',week));
+    if(svg._sparkCache)svg._sparkCache.hits.push(hit);
+  });
+}
+
+// Главная схема: исходная логика размещения квартир сохранена, фильтры меняют акценты.
+const svgNs='http://www.w3.org/2000/svg';
+const mapSvg=document.getElementById('section-chart');
+const mapHomes=[],mapGroups=[],mapBuildings=[];
+function addSvg(parent,tag,attrs={},content=''){
+  const el=document.createElementNS(svgNs,tag);
+  Object.entries(attrs).forEach(([key,value])=>el.setAttribute(key,value));
+  if(content!=='')el.textContent=content;
+  parent.appendChild(el);
+  return el;
+}
+const LEFT=58,TOP=113,RH=18.1,HOME_UNIT=18,PLAN_GUTTER=2,GAP=17,MAX=29,BOT=TOP+28*RH;
+const roomWidth=rooms=>rooms*HOME_UNIT;
+const buildings=buildingNames.map(name=>{
+  const items=homes.filter(h=>h.building===name),m=new Map();
+  for(const h of items){if(!m.has(h.plan))m.set(h.plan,{name:h.plan,area:h.area,rooms:h.rooms,items:[]});m.get(h.plan).items.push(h)}
+  const sourcePlans=[...m.values()].sort((a,b)=>a.rooms-b.rooms||Math.round(a.area)-Math.round(b.area)||a.area-b.area||a.name.localeCompare(b.name,'ru'));
+  const buckets=new Map();
+  for(const source of sourcePlans){
+    const key=`${source.rooms}:${Math.round(source.area)}`;
+    if(!buckets.has(key))buckets.set(key,[]);
+    const slots=buckets.get(key);
+    let slot=slots.find(s=>source.items.every(h=>!s.floors.has(h.floor)));
+    if(!slot){slot={rooms:source.rooms,area:source.area,items:[],floors:new Set()};slots.push(slot)}
+    slot.area=Math.max(slot.area,source.area);
+    slot.items.push(...source.items);
+    source.items.forEach(h=>slot.floors.add(h.floor));
+  }
+  const plans=[...buckets.values()].flat();
+  let width=0;for(const plan of plans){plan.x=width;plan.width=roomWidth(plan.rooms)+PLAN_GUTTER;width+=plan.width}
+  return {name,items,plans,width,top:Math.max(...items.map(h=>h.floor)),sold:items.filter(h=>h.sold).length};
+});
+let cursor=LEFT;for(const b of buildings){b.x=cursor;cursor+=b.width+GAP}
+const floorY=f=>TOP+(MAX-f)*RH;
+function drawMap(){
+  for(const floor of [29,25,20,15,12,10,7,5,2]){
+    const y=floorY(floor)+RH/2;
+    addSvg(mapSvg,'line',{x1:LEFT-10,y1:y,x2:cursor-8,y2:y,stroke:'#e1e5df','stroke-width':1,'stroke-dasharray':'2 6'});
+    addSvg(mapSvg,'text',{x:LEFT-17,y:y+3,'text-anchor':'end',class:'chart-axis'},String(floor));
+  }
+  addSvg(mapSvg,'text',{x:10,y:TOP-15,class:'chart-axis'},'ЭТАЖ');
+  for(const b of buildings){
+    const y0=floorY(b.top);
+    addSvg(mapSvg,'rect',{x:b.x-3,y:y0-5,width:b.width+6,height:BOT-y0+5,fill:'#f0f2ed',stroke:'#c1cbc4','stroke-width':1.2});
+    addSvg(mapSvg,'path',{d:`M ${b.x-6} ${y0-6} L ${b.x+5} ${y0-16} L ${b.x+b.width-5} ${y0-16} L ${b.x+b.width+6} ${y0-6}`,fill:'none',stroke:'#95a9a5','stroke-width':1.2});
+    const nameEl=addSvg(mapSvg,'text',{x:b.x,y:y0-40,class:'chart-building',tabindex:0,'aria-label':`Выбрать корпус ${b.name}`},b.name);
+    const subEl=addSvg(mapSvg,'text',{x:b.x+36,y:y0-40,class:'chart-building-sub'},`${pct(b.sold,b.items.length)}% · ${b.sold}/${b.items.length}`);
+    activate(nameEl,()=>setFilter('building',b.name));
+    bindTip(nameEl,()=>{const items=b.items.filter(h=>inScope(h));return tip('Корпус',b.name,`${items.filter(selectedSale).length} из ${items.length} квартир в выборке`,[],'Нажмите для выбора корпуса')});
+    mapBuildings.push({el:nameEl,subEl,b});
+    for(let f=2;f<=b.top;f++)addSvg(mapSvg,'line',{x1:b.x-3,y1:floorY(f)+RH,x2:b.x+b.width+3,y2:floorY(f)+RH,stroke:'#d9e0d9','stroke-width':.65});
+    let previousRoom=null;
+    for(const plan of b.plans){
+      const x=b.x+plan.x;
+      if(previousRoom!==null&&plan.rooms!==previousRoom)addSvg(mapSvg,'line',{x1:x,y1:y0-5,x2:x,y2:BOT,stroke:'#829a94','stroke-width':2});
+      previousRoom=plan.rooms;
+      for(const h of plan.items){
+        const rect=addSvg(mapSvg,'rect',{x:x+PLAN_GUTTER/2,y:floorY(h.floor)+1.6,width:roomWidth(h.rooms),height:RH-3.2,rx:2.2,fill:soldAt(h)?'#405d62':'#b27b5c',class:'chart-home',tabindex:0,'aria-label':`${h.building}, этаж ${h.floor}, ${roomShort(h.rooms)}, ${one.format(h.area)} м², ${soldAt(h)?'продана':'в продаже'}`});
+        bindTip(rect,()=>homeTip(h));
+        activate(rect,()=>selectHome(h));
+        mapHomes.push({el:rect,h});
+      }
+    }
+    const roomGroups=[];
+    for(const plan of b.plans){
+      let group=roomGroups.at(-1);
+      if(!group||group.rooms!==plan.rooms){group={rooms:plan.rooms,x:plan.x,width:0,plans:[]};roomGroups.push(group)}
+      group.width+=plan.width;group.plans.push(plan);
+    }
+    for(const group of roomGroups){
+      const rect=addSvg(mapSvg,'rect',{x:b.x+group.x+1,y:BOT+4,width:group.width-2,height:31,rx:3,class:'chart-group',tabindex:0,'aria-label':`${b.name}, ${roomShort(group.rooms)}, выбрать сегмент`});
+      const groupItems=group.plans.flatMap(plan=>plan.items);
+      bindTip(rect,()=>{
+        const n=groupItems.length,s=groupItems.filter(soldAt).length;
+        const areas=group.plans.map(plan=>plan.area);
+        return tip(`${b.name} · группа квартир`,`${roomShort(group.rooms)} · ${one.format(Math.min(...areas))}–${one.format(Math.max(...areas))} м²`,`${s} из ${n} продано · ${pct(s,n)}%`,[],'Нажмите, чтобы выбрать корпус и комнатность',s/n<.5);
+      });
+      activate(rect,()=>setPair('building',b.name,'rooms',group.rooms));
+      const roomLabel=addSvg(mapSvg,'text',{x:b.x+group.x+group.width/2,y:BOT+24,'text-anchor':'middle',class:'chart-room','pointer-events':'none'},roomShort(group.rooms));
+      if(group.width<48||roomLabel.getComputedTextLength?.()>group.width-8)roomLabel.textContent=`${group.rooms}к`;
+      mapGroups.push({el:rect,items:groupItems});
+    }
+  }
+}
+function updateMap(){
+  const focus=dealFocusActive();
+  for(const {el,h} of mapHomes){
+    el.classList.remove('out-of-scope','deal-context-dim','unsold-context-dim','focus-deal');
+    const sold=soldAt(h);
+    el.setAttribute('fill',sold?'#405d62':'#b27b5c');
+    el.setAttribute('aria-label',`${h.building}, этаж ${h.floor}, ${roomShort(h.rooms)}, ${one.format(h.area)} м², ${sold?'продана':'в продаже'}`);
+    el.setAttribute('aria-pressed',state.homeId===h.id);
+    if(!inScope(h))el.classList.add('out-of-scope');
+    else if(state.homeId)el.classList.add('focus-deal');
+    else if(timeline.index!==null){
+      if(sold&&weekOf(h.date)===allWeeks[timeline.index]&&(!state.manager||h.manager===state.manager))el.classList.add('focus-deal');
+      else if(state.manager&&sold&&h.manager!==state.manager)el.classList.add('deal-context-dim');
+    }else if(focus){if(focusedDeal(h))el.classList.add('focus-deal');else el.classList.add(h.sold?'deal-context-dim':'unsold-context-dim')}
+  }
+  for(const {el,items} of mapGroups)el.classList.toggle('out-of-scope',!items.some(h=>inScope(h)));
+  for(const {el,subEl,b} of mapBuildings){
+    el.style.opacity=state.building&&state.building!==b.name?'.4':'1';
+    const items=b.items.filter(h=>inScope(h)),sold=items.filter(selectedSale).length;
+    subEl.textContent=`${pct(sold,items.length)}% · ${sold}/${items.length}`;
+    subEl.style.opacity=el.style.opacity;
+  }
+}
+
+const managerSort={key:'revenue',direction:-1};
+function renderManagers(){
+  const pool=scoped().filter(selectedSale);
+  const managerNames=[...new Set(homes.filter(h=>h.sold).map(h=>h.manager))];
+  const groups=managerNames.map(name=>{
+    const items=pool.filter(h=>h.manager===name),days=items.map(h=>Number(h.days)).filter(Number.isFinite);
+    const gross=sum(items,'cost'),discount=sum(items,'discount');
+    return {name,items,count:items.length,days:median(days),discount,discountRate:gross?100*discount/gross:0,revenue:sum(items,'deal')};
+  });
+  const body=document.getElementById('manager-table-body');
+  if(timeline.index===null)body.textContent='';
+  document.querySelectorAll('.manager-sort').forEach(button=>{
+    const active=button.dataset.managerSort===managerSort.key;
+    button.classList.toggle('active',active);
+    button.classList.toggle('asc',active&&managerSort.direction===1);
+    button.closest('th').setAttribute('aria-sort',active?(managerSort.direction===-1?'descending':'ascending'):'none');
+  });
+  if(!groups.length){
+    const row=document.createElement('tr'),cell=document.createElement('td');
+    cell.colSpan=4;cell.className='manager-table-empty';cell.textContent='В выбранном сегменте нет сделок.';
+    row.appendChild(cell);body.appendChild(row);timeline.lastManagerValues={};return;
+  }
+  const reference=managerNames.map(name=>{
+    const items=homes.filter(h=>h.sold&&h.manager===name);
+    return {name,revenue:sum(items,'deal'),count:items.length,discount:sum(items,'discount')};
+  });
+  const max={revenue:Math.max(...reference.map(g=>g.revenue)),count:Math.max(...reference.map(g=>g.count)),discount:Math.max(...reference.map(g=>g.discount))};
+  const metrics=[
+    {key:'revenue',format:v=>moneyDigits.format(v/1e9)},
+    {key:'count',format:v=>nf.format(Math.round(v))},
+    {key:'discount',format:v=>moneyDigits.format(v/1e6)}
+  ];
+  const roomMix=g=>roomNumbers.map(n=>{const count=g.items.filter(h=>h.rooms===n).length;return count?`${n} комн.: ${count}`:null}).filter(Boolean).join(' · ');
+  const managerTip=g=>tip('Менеджер',g.name,`${g.count} закрытых сделок`,[
+    ['Выручка',rub(g.revenue)],['Средний чек',g.count?rub(g.revenue/g.count):'—'],
+    ['Квартиры',roomMix(g)],['Скидки',`${rub(g.discount)} · ${moneyDigits.format(g.discountRate)}%`],
+    ['Медиана срока',g.days===null?'—':`${moneyDigits.format(g.days)} дней`]
+  ],'Нажмите, чтобы выделить сделки менеджера');
+  const fullByName=new Map(reference.map(g=>[g.name,g]));
+  groups.sort((a,b)=>{
+    const left=fullByName.get(a.name),right=fullByName.get(b.name);
+    return managerSort.direction*(left[managerSort.key]-right[managerSort.key])||right.revenue-left.revenue;
+  });
+  const previous=timeline.lastManagerValues||{};
+  const existing=new Map([...body.querySelectorAll('tr[data-manager]')].map(row=>[row.dataset.manager,row]));
+  groups.forEach(g=>{
+    let row=existing.get(g.name);
+    if(!row){
+      row=document.createElement('tr');row.tabIndex=0;row.dataset.manager=g.name;
+      const nameCell=document.createElement('td');nameCell.className='manager-row-name';nameCell.textContent=g.name.split(' ')[0];row.appendChild(nameCell);
+      metrics.forEach(({key})=>{
+        const cell=document.createElement('td'),box=document.createElement('div'),bar=document.createElement('span'),number=document.createElement('span');
+        box.className=`manager-cell ${key}`;bar.className='manager-cell-bar';number.className='manager-cell-number';
+        box.append(bar,number);cell.appendChild(box);row.appendChild(cell);
+      });
+      activate(row,()=>setFilter('manager',g.name));bindTip(row,()=>managerTip(row._group));body.appendChild(row);
+    }
+    row._group=g;
+    row.classList.toggle('selected',state.manager===g.name);
+    row.setAttribute('aria-label',`${g.name}: выручка ${rub(g.revenue)}, ${g.count} сделок, скидки ${rub(g.discount)}. Нажмите для выбора.`);
+    metrics.forEach(({key,format})=>{
+      const box=row.querySelector(`.manager-cell.${key}`),bar=box.querySelector('.manager-cell-bar'),number=box.querySelector('.manager-cell-number');
+      const from=previous[g.name]?.[key]||0;
+      const target=max[key]?`${100*g[key]/max[key]}%`:'0%';
+      if(timeline.index!==null){
+        if(!existing.has(g.name))bar.style.width=max[key]?`${100*from/max[key]}%`:'0%';
+        window.requestAnimationFrame?.(()=>{if(bar.isConnected)bar.style.width=target});
+        tweenText(number,from,g[key],format);
+      }else{bar.style.width=target;number.textContent=format(g[key])}
+    });
+  });
+  timeline.lastManagerValues=timeline.index!==null?Object.fromEntries(groups.map(g=>[g.name,{revenue:g.revenue,count:g.count,discount:g.discount}])):null;
+}
+
+const segmentNodes=new Map();
+function renderSegments(){
+  const svg=document.getElementById('segment-chart'),playback=timeline.index!==null;
+  const fresh=!playback||svg.dataset.playback!=='1';
+  svg.dataset.playback=playback?'1':'0';
+  svg.setAttribute('viewBox','0 0 390 274');
+  const pool=scoped(),sold=pool.filter(selectedSale).length,overall=pct(sold,pool.length);
+  if(fresh){
+    svg.replaceChildren();segmentNodes.clear();
+    addSvg(svg,'text',{x:2,y:25,class:'segment-axis'},'КОРПУС');
+    roomNumbers.forEach((rooms,j)=>addSvg(svg,'text',{x:55+j*80+36,y:25,'text-anchor':'middle',class:'segment-axis'},`${rooms} КОМН.`));
+  }
+  buildingNames.forEach((building,i)=>{
+    const y=43+i*38;
+    if(fresh)addSvg(svg,'text',{x:3,y:y+22,class:'segment-building'},building);
+    roomNumbers.forEach((rooms,j)=>{
+      const allItems=homes.filter(h=>h.building===building&&h.rooms===rooms);
+      const items=pool.filter(h=>h.building===building&&h.rooms===rooms),n=items.length,s=items.filter(selectedSale).length,rate=pct(s,n),x=55+j*80;
+      const selected=state.homeId?items.some(h=>h.id===state.homeId):state.building===building&&state.rooms===rooms;
+      const fill=!n?'#f3f4ef':n<8?'#eff0eb':rate===0?'#e9cbb9':rate<overall?(rate<50?'#e9cbb9':'#f1e4d9'):(rate>=85?'#d4e5d9':'#e5eee5');
+      const key=`${building}-${rooms}`;
+      let node=segmentNodes.get(key);
+      if(fresh){
+        const rect=addSvg(svg,'rect',{x,y,width:73,height:33,rx:4,class:'segment-cell',fill,stroke:'#e2e7df','stroke-width':1});
+        const rateText=addSvg(svg,'text',{x:x+36.5,y:y+15,'text-anchor':'middle',class:'segment-rate'});
+        const countText=addSvg(svg,'text',{x:x+36.5,y:y+27,'text-anchor':'middle',class:'segment-count'});
+        const hit=addSvg(svg,'rect',{x,y,width:73,height:33,fill:'transparent',class:'segment-hit',tabindex:0});
+        node={rect,rateText,countText,hit};segmentNodes.set(key,node);
+        activate(hit,()=>setPair('building',building,'rooms',rooms));
+        bindTip(hit,()=>{
+          const data=node.data,views=[...new Set(data.items.map(h=>h.view))],floors=data.items.map(h=>h.floor);
+          if(!data.n)return tip('Корпус и комнатность',`${building} · ${roomShort(rooms)}`,'0 квартир в выбранной группе',[],'Нажмите, чтобы выбрать группу');
+          const otherLabel=state.manager||state.week||state.dateFrom||state.dateTo?'Остальные квартиры':'В продаже';
+          return tip('Корпус и комнатность',`${building} · ${roomShort(rooms)}`,`${data.s} из ${data.n} продано`,[['Доля',`${data.rate}%`],[otherLabel,String(data.n-data.s)],['Этажи',`${Math.min(...floors)}–${Math.max(...floors)}`],['Вид',views.length<=2?views.join(', '):`${views.length} вида`],['Мед. цена',rub(median(data.items.map(h=>h.cost)))]],'Нажмите, чтобы выбрать эти квартиры',data.rate<data.overall);
+        });
+      }
+      node.data={items,n,s,rate,overall};
+      node.rect.setAttribute('fill',fill);
+      node.rect.setAttribute('stroke',selected?'#9c6e52':'#e2e7df');
+      node.rect.setAttribute('stroke-width',selected?2:1);
+      node.rateText.textContent=allItems.length?`${rate}%`:'—';
+      node.countText.textContent=allItems.length?`${s}/${n}`:'';
+      node.rateText.setAttribute('y',allItems.length?y+15:y+22);
+      node.rateText.setAttribute('class',allItems.length?'segment-rate':'segment-empty');
+      node.hit.setAttribute('aria-label',`${building}, ${rooms} комнаты: ${s} из ${n} продано, ${rate}%`);
+      node.hit.style.pointerEvents=allItems.length?'auto':'none';
+      node.hit.setAttribute('tabindex',allItems.length?0:-1);
+    });
+  });
+}
+
+function renderAll(){
+  tooltip.classList.remove('is-visible');
+  renderFilters();renderMetrics();updateMap();renderManagers();renderSegments();
+}
+document.querySelectorAll('[data-manager-sort]').forEach(button=>button.addEventListener('click',()=>{
+  const key=button.dataset.managerSort;
+  if(managerSort.key===key)managerSort.direction*=-1;
+  else{managerSort.key=key;managerSort.direction=-1}
+  renderManagers();
+}));
+document.getElementById('reset-filters').addEventListener('click',resetFilters);
+const managerNames=[...new Set(homes.filter(h=>h.sold).map(h=>h.manager))].sort((a,b)=>a.localeCompare(b,'ru'));
+document.getElementById('building-select').innerHTML+=[...buildingNames].map(b=>`<option value="${b}">${b}</option>`).join('');
+document.getElementById('rooms-select').innerHTML+=roomNumbers.map(n=>`<option value="${n}">${roomShort(n)}</option>`).join('');
+document.getElementById('manager-select').innerHTML+=managerNames.map(m=>`<option value="${esc(m)}">${esc(m)}</option>`).join('');
+for(const [id,key,parse] of [['building-select','building',v=>v||null],['rooms-select','rooms',v=>v?Number(v):null],['manager-select','manager',v=>v||null]]){
+  document.getElementById(id).addEventListener('change',e=>{stopPlayback();state.homeId=null;state[key]=parse(e.target.value);renderAll()});
+}
+const periodTrigger=document.getElementById('period-trigger'),periodPopover=document.getElementById('period-popover');
+function closePeriod(){periodPopover.hidden=true;periodTrigger.setAttribute('aria-expanded','false')}
+const calendarMin=allWeeks[0],calendarMax=dataEnd;
+const calendarMonthFormat=new Intl.DateTimeFormat('ru-RU',{month:'long',year:'numeric',timeZone:'UTC'});
+const calendarDayFormat=new Intl.DateTimeFormat('ru-RU',{dateStyle:'long',timeZone:'UTC'});
+let calendarMonth=dataEnd.slice(0,7),draftFrom=null,draftTo=null;
+document.getElementById('period-anchor').textContent=`Отсчёт от последней сделки: ${calendarDayFormat.format(dateObj(dataEnd))}`;
+function renderCalendar(){
+  const [year,month]=calendarMonth.split('-').map(Number);
+  const first=new Date(Date.UTC(year,month-1,1));
+  const offset=(first.getUTCDay()+6)%7;
+  const length=new Date(Date.UTC(year,month,0)).getUTCDate();
+  const grid=document.getElementById('calendar-grid');
+  let html=Array(offset).fill('<span class="calendar-blank"></span>').join('');
+  for(let day=1;day<=length;day++){
+    const iso=`${calendarMonth}-${String(day).padStart(2,'0')}`;
+    const classes=['calendar-day'];
+    if(draftFrom&&draftTo&&iso>draftFrom&&iso<draftTo)classes.push('in-range');
+    if(iso===draftFrom)classes.push('range-start');
+    if(iso===draftTo)classes.push('range-end');
+    const disabled=iso<calendarMin||iso>calendarMax;
+    html+=`<button type="button" class="${classes.join(' ')}" data-date="${iso}" aria-label="${esc(calendarDayFormat.format(dateObj(iso)))}" ${disabled?'disabled':''}>${day}</button>`;
+  }
+  grid.innerHTML=html;
+  grid.querySelectorAll('[data-date]').forEach(button=>button.addEventListener('click',()=>{
+    const iso=button.dataset.date;
+    if(!draftFrom||draftTo){draftFrom=iso;draftTo=null}
+    else if(iso<draftFrom){draftTo=draftFrom;draftFrom=iso}
+    else draftTo=iso;
+    renderCalendar();
+  }));
+  document.getElementById('calendar-month').textContent=calendarMonthFormat.format(first);
+  document.getElementById('calendar-prev').disabled=calendarMonth<=calendarMin.slice(0,7);
+  document.getElementById('calendar-next').disabled=calendarMonth>=calendarMax.slice(0,7);
+  document.getElementById('calendar-selection').textContent=draftFrom&&draftTo?`${dateFormat.format(dateObj(draftFrom))} — ${dateFormat.format(dateObj(draftTo))}`:draftFrom?`С ${dateFormat.format(dateObj(draftFrom))} · выберите конец`:'Выберите начало и конец';
+  document.getElementById('period-apply').disabled=!(draftFrom&&draftTo);
+}
+function shiftCalendarMonth(delta){
+  const [year,month]=calendarMonth.split('-').map(Number);
+  calendarMonth=isoDate(new Date(Date.UTC(year,month-1+delta,1))).slice(0,7);
+  renderCalendar();
+}
+document.getElementById('calendar-prev').addEventListener('click',()=>shiftCalendarMonth(-1));
+document.getElementById('calendar-next').addEventListener('click',()=>shiftCalendarMonth(1));
+periodTrigger.addEventListener('click',()=>{
+  const open=periodPopover.hidden;
+  if(open){
+    stopPlayback();renderAll();
+    draftFrom=state.periodPreset==='custom'?state.dateFrom:null;
+    draftTo=state.periodPreset==='custom'?state.dateTo:null;
+    calendarMonth=(draftTo||dataEnd).slice(0,7);
+    renderCalendar();periodPopover.hidden=false;
+  }
+  else periodPopover.hidden=true;
+  periodTrigger.setAttribute('aria-expanded',String(open));
+});
+function applyPeriod(preset,from,to){
+  stopPlayback();state.homeId=null;
+  state.periodPreset=preset==='all'?null:preset;
+  state.dateFrom=from;state.dateTo=to;
+  closePeriod();renderAll();
+}
+periodPopover.querySelectorAll('[data-period]').forEach(button=>button.addEventListener('click',()=>{
+  const preset=button.dataset.period;
+  applyPeriod(preset,...periodRange(preset));
+}));
+function applyCustomPeriod(){
+  if(draftFrom&&draftTo)applyPeriod('custom',draftFrom,draftTo);
+}
+document.getElementById('period-apply').addEventListener('click',applyCustomPeriod);
+document.addEventListener('pointerdown',e=>{if(!document.querySelector('.time-filter').contains(e.target))closePeriod()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!periodPopover.hidden){closePeriod();periodTrigger.focus()}});
+window.addEventListener('scroll',()=>tooltip.classList.remove('is-visible'),{passive:true});
+window.addEventListener('resize',()=>{tooltip.classList.remove('is-visible');renderMetrics()},{passive:true});
+const reduceMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+if(!reduceMotion){timeline.index=0;timeline.playing=true}
+drawMap();renderAll();
+if(!reduceMotion)scheduleTimeline();
+
+</script>
+</body>
+</html>
